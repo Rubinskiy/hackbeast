@@ -1,0 +1,56 @@
+{% extends 'base.html' %}
+
+{% block head %}
+    <title>Post</title>
+{% endblock %}
+
+{% block body %}
+    <div class="container is-fluid">
+        <div class="columns">
+            <div class="column"></div>
+            <div class="column is-three-quarters">
+                <div class="box round">
+                    <article class="media">
+                        <div class="media-left">
+                        <figure class="image is-64x64">
+                            <img src="{{data[3]}}" class="is-sway" alt="{{data[0]}}">
+                        </figure>
+                        </div>
+                        <div class="media-content">
+                        <div class="content">
+                            <p class="par title is-4">{{data[5]}}</p>
+                            <span>
+                                <small>
+                                    By <a href="#">@{{data[0]}}
+                                    {% if data[1] == 1 %}
+                                        <span class="bi bi-patch-check is-verified"></span>
+                                    {% endif %}
+                                    {% if data[2] == 1 %}
+                                        <span class="modtext">[mod]</span>
+                                    {% endif %}
+                                </a>
+                                <span id="time"> - {{get_post_time(data[7])}}</span></small>
+                            </span>
+                        </div>
+                            <nav class="level is-mobile">
+                                <div class="level-left">
+                                    <a class="level-item" aria-label="share">
+                                        <span class="bi bi-share"></span>
+                                    </a>
+                                    <a class="level-item" aria-label="like">
+                                        <span class="bi bi-hand-thumbs-up"></span>
+                                    </a>
+                                    <a class="level-item" aria-label="open">
+                                        <span class="bi bi-box-arrow-in-right"></span>
+                                    </a>
+                                </div>
+                            </nav>
+                            <p>{{data[6]}}</p>
+                        </div>
+                    </article>
+                </div>
+            </div>
+            <div class="column"></div>
+        </div>
+    </div>
+{% endblock %}

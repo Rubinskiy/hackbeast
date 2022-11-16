@@ -20,6 +20,21 @@ app.config['MYSQL_PASSWORD'] = ''
 app.config['MYSQL_DB'] = 'superbarreldb'
 mysql = MySQL(app)
 
+# https://github.com/snguyenthanh/better_profanity/blob/master/better_profanity/profanity_wordlist.txt
+custom_curse_words = [
+   'areole', 
+   'arian',
+   'aryan',
+   'asanchez',
+   ''
+]
+profanity.load_censor_words(custom_curse_words)
+
+@app.errorhandler(404)
+def not_found(e):
+   title = "404"
+   return render_template('404.html', title=title, error=e)
+
 @app.route('/')
 def home():
    msg = ""
@@ -59,18 +74,27 @@ def create_post():
 @app.route('/forum/latest')
 def latest():
    cursor = mysql.connection.cursor()
-   cursor.execute('''SELECT profiles.username, profiles.is_verified, profiles.is_mod, profiles.ppic, post_id, title, descr, timestamp FROM profiles, posts WHERE profiles.id = user_id AND type=1 ORDER BY timestamp DESC LIMIT 10''')
+   cursor.execute('''SELECT profiles.username, profiles.is_verified, profiles.is_mod, profiles.ppic, post_id, title, descr, timestamp FROM profiles, posts WHERE profiles.id=user_id AND type=1 ORDER BY timestamp DESC LIMIT 10''')
    mysql.connection.commit()
    data = cursor.fetchall()
    return render_template('latest.html', data=data, get_post_time=get_post_time, limit_char=limit_char)
    cursor.close()
 
-@app.route('/forum/<int:page>')
-def forum_page(page):
-   pass
-@app.route('/hello/<name>')
-def hello_name(name):
-   return 'Hello %s!' % name
+@app.route('/forum/<id>/<page>')
+def forum_page(id=None, page=None):
+   if page == None or id == None:
+      return redirect('/forum')
+   else:
+      cursor = mysql.connection.cursor()
+      cursor.execute('''SELECT profiles.username, profiles.is_verified, profiles.is_mod, profiles.ppic, post_id, title, descr, timestamp FROM profiles, posts WHERE profiles.id=user_id AND post_id=%s AND REPLACE(posts.title, ' ', '-')=%s;''', 
+      ([int(id), str(page)]))
+      mysql.connection.commit()
+      data = cursor.fetchone()
+      if data == None:
+         return redirect('/404')
+      return render_template('post.html', data=data, get_post_time=get_post_time)
+      cursor.close()
+   return page
 
 #-----------------AUTH-----------------#
 @app.route('/login')
@@ -146,7 +170,7 @@ def authreg():
     response = requests.post(api_route, data=data, headers=headers)'''
 
 # -----------------FUNCTIONS-----------------#
-def limit_char(text, limit, ext="..."):
+def limit_char(text, limit=50, ext="..."):
    if len(text) > limit:
       return text[:limit] + ext
    return text

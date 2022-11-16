@@ -53,20 +53,20 @@
                                     <span class="bi bi-patch-check is-verified"></span>
                                 {% endif %}
                                 {% if post[2] == 1 %}
-                                    <span class="bi bi-eye is-mod"></span>
+                                    <span class="modtext">[mod]</span>
                                 {% endif %}
                             </a><span id="time"> - {{get_post_time(post[6])}}</span></small></span>
                         </div>
                         <nav class="level is-mobile">
                             <div class="level-left">
-                                <a class="level-item" aria-label="open">
-                                    <span class="bi bi-box-arrow-in-up-right"></span>
+                                <a class="level-item">
+                                    <span class="bi bi-share"></span>
                                 </a>
-                                <a class="level-item" aria-label="like">
+                                <a class="level-item">
                                     <span class="bi bi-hand-thumbs-up"></span>
                                 </a>
-                                <a class="level-item" aria-label="share">
-                                    <span class="bi bi-share"></span>
+                                <a href="/forum/{{post[4]}}/{{post[5].replace(' ', '-')}}" class="level-item">
+                                    <span class="bi bi-box-arrow-in-right"></span>
                                 </a>
                             </div>
                         </nav>

@@ -21,36 +21,43 @@
                 <div class="box round">
                     <article class="media">
                         <div class="media-left">
-                        <figure class="image is-64x64">
-                            <img src="{{post[3]}}" class="is-sway" alt="{{post[0]}}">
-                        </figure>
-                        </div>
-                        <div class="media-content">
-                        <div class="content">
-                            <p class="par title is-4">{{post[5]}}</p>
-                            <p class="">{{limit_char(post[6], 120, "<a href=\"\"> . . . Read more</a>")|safe}}
-                            <span style="display: block;"><small>By <a href="#">@{{post[0]}}
-                                {% if post[1] == 1 %}
-                                    <span class="bi bi-patch-check is-verified"></span>
-                                {% endif %}
-                                {% if post[2] == 1 %}
-                                    <span class="bi bi-eye is-mod"></span>
-                                {% endif %}
-                            </a><span id="time"> - {{get_post_time(post[7])}}</span></small></span>
-                        </div></p>
-                        <nav class="level is-mobile">
-                            <div class="level-left">
-                                <a class="level-item" aria-label="open">
-                                    <span class="bi bi-box-arrow-in-up-right"></span>
-                                </a>
-                                <a class="level-item" aria-label="like">
-                                    <span class="bi bi-hand-thumbs-up"></span>
-                                </a>
-                                <a class="level-item" aria-label="share">
-                                    <span class="bi bi-share"></span>
-                                </a>
+                            <figure class="image is-64x64">
+                                <img src="{{post[3]}}" class="is-sway" alt="{{post[0]}}">
+                            </figure>
                             </div>
-                        </nav>
+                            <div class="media-content">
+                            <div class="content">
+                                <p class="par title is-4">{{post[5]}}</p>
+                                <p>
+                                    {% if post[6]|length > 120 %}
+                                        {{ post[6][:120] }}
+                                        <span class="is-hidden-mobile">. . .</span>
+                                        <a href="/forum/{{post[4]}}/{{post[5].replace(' ', '-')}}">Read more</a>
+                                    {% else %}
+                                        {{post[6]}}
+                                    {% endif %}
+                                <span style="display: block;"><small>By <a href="#">@{{post[0]}}
+                                    {% if post[1] == 1 %}
+                                        <span class="bi bi-patch-check is-verified"></span>
+                                    {% endif %}
+                                    {% if post[2] == 1 %}
+                                        <span class="modtext">[mod]</span>
+                                    {% endif %}
+                                </a><span id="time"> - {{get_post_time(post[7])}}</span></small></span>
+                            </div></p>
+                            <nav class="level is-mobile is-pulled-right">
+                                <div class="level-right">
+                                    <a class="level-item">
+                                        <span class="bi bi-share"></span>
+                                    </a>
+                                    <a class="level-item">
+                                        <span class="bi bi-hand-thumbs-up"></span>
+                                    </a>
+                                    <a href="/forum/{{post[4]}}/{{post[5].replace(' ', '-')}}" class="level-item">
+                                        <span class="bi bi-box-arrow-in-right"></span>
+                                    </a>
+                                </div>
+                            </nav>
                         </div>
                     </article>
                 </div>

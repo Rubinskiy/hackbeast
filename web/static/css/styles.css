@@ -144,3 +144,10 @@ input[type=text], input[type=password], input[type=email] {
     font-weight: 700 !important;
     margin-bottom: 0px !important;
 }
+.modtext {
+    color: #fc0303;
+    text-shadow:
+        0 0 19px #fff,
+        0 0 10px #fc0303,
+        0 0 21px #fc0303;
+}
