@@ -45,7 +45,17 @@
                                     </a>
                                 </div>
                             </nav>
-                            <p>{{data[6]}}</p>
+                            <p>
+                                <!--if [code] is in the data[6], then wrap the text inside it as <pre> until [/code]-->
+                                {% if '[code]' in data[6] %}
+                                    {% set code = data[6].split('[code]') %}
+                                    {{code[0]}}
+                                    <pre class="prettyprint" style="margin-top:15px;margin-bottom:15px;resize:vertical;overflow:auto;">{{code[1].split('[/code]')[0]}}</pre>
+                                    {{code[1].split('[/code]')[1]}}
+                                {% else %}
+                                    {{data[6]}}
+                                {% endif %}
+                            </p>
                         </div>
                     </article>
                 </div>
@@ -53,4 +63,6 @@
             <div class="column"></div>
         </div>
     </div>
+    <script src="https://cdn.jsdelivr.net/gh/google/code-prettify@master/loader/run_prettify.js"></script>
+    <script data-brackets-id='140' src="https://google-code-prettify.googlecode.com/svn/loader/run_prettify.js?autoload=true&amp;skin=sunburst&amp;lang=css" defer="defer"></script>
 {% endblock %}
