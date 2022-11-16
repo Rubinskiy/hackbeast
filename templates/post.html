@@ -2,6 +2,7 @@
 
 {% block head %}
     <title>Post</title>
+    <script src="https://cdn.jsdelivr.net/gh/google/code-prettify@master/loader/run_prettify.js"></script>
 {% endblock %}
 
 {% block body %}
@@ -35,13 +36,10 @@
                             <nav class="level is-mobile">
                                 <div class="level-left">
                                     <a class="level-item" aria-label="share">
-                                        <span class="bi bi-share"></span>
+                                        <span class="bi bi-share"></span>&nbsp;23
                                     </a>
                                     <a class="level-item" aria-label="like">
-                                        <span class="bi bi-hand-thumbs-up"></span>
-                                    </a>
-                                    <a class="level-item" aria-label="open">
-                                        <span class="bi bi-box-arrow-in-right"></span>
+                                        <span class="bi bi-hand-thumbs-up"></span>&nbsp;2192
                                     </a>
                                 </div>
                             </nav>
@@ -58,11 +56,102 @@
                             </p>
                         </div>
                     </article>
+                    <div style="padding-top: 25px;"></div>
                 </div>
+                
+                <div class="box round">
+                    <p class="par title is-4">Comments</p>
+                    <div style="padding-top: 15px;"></div>
+                    <article class="media">
+
+                        <figure class="media-left">
+                          <p class="image is-64x64">
+                            <img src="{{data[3]}}" class="is-sway" alt="{{data[0]}}">
+                          </p>
+                        </figure>
+                        <div class="media-content">
+                          <div class="content">
+                            <p>
+                                <strong>Barbara Middleton</strong>
+                                <br>
+                                Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis porta eros lacus, nec ultricies elit blandit non. Suspendisse pellentesque mauris sit amet dolor blandit rutrum. Nunc in tempus turpis.
+                                <br>
+                                <small>
+                                    <a href="#" aria-label="like"><span class="bi bi-hand-thumbs-up"></span>&nbsp;2192</a> · 
+                                    <a>Reply</a> · 3 hrs
+                                </small>
+                            </p>
+                          </div>
+                      
+                          <article class="media">
+                            <figure class="media-left">
+                              <p class="image is-48x48">
+                                <img src="{{data[3]}}" class="is-sway" alt="{{data[0]}}">
+                              </p>
+                            </figure>
+                            <div class="media-content">
+                              <div class="content">
+                                <p>
+                                    <strong>Sean Brown</strong>
+                                    <br>
+                                    Donec sollicitudin urna eget eros malesuada sagittis. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Aliquam blandit nisl a nulla sagittis, a lobortis leo feugiat.
+                                    <br>
+                                    <small>
+                                        <a href="#" aria-label="like"><span class="bi bi-hand-thumbs-up"></span>&nbsp;2192</a> · 
+                                        <a>Reply</a> · 2 hrs
+                                    </small>
+                                </p>
+                              </div>
+                          </article>
+                      
+                            <article class="media">
+                                <figure class="media-left">
+                                    <p class="image is-48x48">
+                                        <img src="{{data[3]}}" class="is-sway" alt="{{data[0]}}">
+                                    </p>
+                                </figure>
+                                <div class="media-content">
+                                    <div class="content">
+                                        <p>
+                                            <strong>Kayli Eunice </strong>
+                                            <br>
+                                            Sed convallis scelerisque mauris, non pulvinar nunc mattis vel. Maecenas varius felis sit amet magna vestibulum euismod malesuada cursus libero. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae; Phasellus lacinia non nisl id feugiat.
+                                            <br>
+                                            <small>
+                                                <a href="#" aria-label="like"><span class="bi bi-hand-thumbs-up-fill"></span>&nbsp;2192</a> · 
+                                                <a>Reply</a> · 2 hrs
+                                            </small>
+                                        </p>
+                                    </div>
+                                </div>
+                            </article>
+                        </div>
+                    </article>
+                    
+                    <article class="media">
+                        <figure class="media-left">
+                            <p class="image is-64x64">
+                                <img src="https://hackershaven.eu/images/hackeast.png" class="is-sway" alt="{{data[0]}}">
+                            </p>
+                        </figure>
+                        <div class="media-content">
+                          <div class="field">
+                            <p class="control">
+                                {% if session.token %}
+                                    <textarea class="textarea btn-round2" name="content" placeholder="Reply as @{{session.uname}}" rows="4" minlength="1" maxlength="600" required></textarea>
+                                {% else %}
+                                    <textarea class="textarea btn-round2" name="content" placeholder="Login to comment.." rows="4" minlength="1" maxlength="600" disabled required></textarea>
+                                {% endif %}
+                            </p>
+                          </div>
+                        </div>
+                    </article>
+                    <div style="padding-top: 25px;"></div>
+                    <a href="#" class="button is-info one btn-round is-pulled-right is-fixed-top"><span class="bi bi-reply"></span>&nbsp;Reply</a>
+                </div>
+                
             </div>
             <div class="column"></div>
         </div>
     </div>
-    <script src="https://cdn.jsdelivr.net/gh/google/code-prettify@master/loader/run_prettify.js"></script>
-    <script data-brackets-id='140' src="https://google-code-prettify.googlecode.com/svn/loader/run_prettify.js?autoload=true&amp;skin=sunburst&amp;lang=css" defer="defer"></script>
 {% endblock %}
