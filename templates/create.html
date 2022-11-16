@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+
+{% block head %}
+    <title>Post</title>
+{% endblock %}
+
+{% block body %}
+    <div class="container is-fluid">
+        <div class="columns">
+            <div class="column"></div>
+            <div class="column is-three-quarters">
+                <h1 class="title">Create a post</h1>
+                <div class="notification is-info round">
+                    <button class="delete"></button>
+                    Please remember to follow the <a href="#" class="one">Community guidelines</a> when posting.
+                </div>
+                <form action="/post-content" class="has-text-white" method = "POST">
+                    <div class="field">
+                        <label class="label has-text-white">Category</label>
+                        <div class="control">
+                            <div class="select">
+                            <select>
+                                <option>General</option>
+                                <option>With options</option>
+                                <option>With options</option>
+                                <option>With options</option>
+                                <option>With options</option>
+                                <option>With options</option>
+                            </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="field">
+                        <label class="label has-text-white">Title</label>
+                        <div class="control">
+                            <input class="input is-rounded" type="text" name="title" placeholder="The title of your post" minlength="6" maxlength="120" required>
+                        </div>
+                    </div>
+                    <div class="field">
+                        <label class="label has-text-white">Content</label>
+                        <div class="control">
+                            <textarea class="textarea btn-round2" name="content" placeholder="Write your content here" rows="12" minlength="24" maxlength="65535" required></textarea>
+                        </div>
+                    </div>
+                    <div style="padding: 6px;"></div>
+                    <button class="button is-pulled-right is-link btn-round" type="submit">Post</button>
+                </form>
+            </div>
+            <div class="column"></div>
+        </div>
+    </div>
+{% endblock %}

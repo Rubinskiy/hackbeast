@@ -1,0 +1,153 @@
+/* === element overrides === */
+html, body {
+    margin: 0;
+    padding: 50px;
+    height: 100vh;
+    font-family: 'Montserrat', sans-serif !important;
+    background-color: #001220 !important;
+    color: #dadada !important;
+}
+body {
+    padding: 15px !important;
+}
+h1 {
+    color: #dadada !important;
+}
+a.one:hover {
+    color: #dadada !important;
+}
+a:hover {
+    color: #34a1eb !important;
+}
+.btn {
+    padding: 5px;
+    color: #dadada;
+    border-radius: 10px;
+    background-color: blueviolet;
+}
+
+/* === icons === */
+.is-mod {
+    font-size: 12px; 
+    color: #fc0547; 
+    -webkit-text-stroke-width: 0.5px;
+}
+.is-verified {
+    font-size: 12px; 
+    color: rgb(29, 161, 242); 
+    -webkit-text-stroke-width: 0.5px;
+}
+.is-heart {
+    font-size: 15px; 
+    color: #fc0547; 
+    -webkit-text-stroke-width: 0.5px;
+}
+.default-icon {
+    font-size: 25px; 
+    color: #dadada; 
+    -webkit-text-stroke-width: 0.5px;
+}
+
+/* === box overrides === */
+.round {
+    border-radius: 25px !important;
+}
+.main {
+    background-color: #0c2539 !important;
+    padding: 32px !important;
+}
+.box-img {
+    border-radius: 25px !important;
+    margin-bottom: 24px !important;
+}
+.box-mb {
+    margin-bottom: 24px !important;
+}
+
+/* === button overrides === */
+.btn-round {
+    border-radius: 15px !important;
+    padding: 20px !important;
+}
+.btn-round2 {
+    border-radius: 15px !important;
+}
+
+/* === input overrides === */
+input[type=text], input[type=password], input[type=email] {
+    border-radius: 15px !important;
+    padding: 20px !important;
+}
+.checkbox:hover {
+    color: #dadada !important;
+}
+
+/* === navbar overrides === */
+.navbar {
+    background-color: #001220 !important;
+    padding: 0px !important;
+    border-radius: 25px !important;
+}
+.navbar-menu {
+    background-color: #001220 !important;
+    padding: 0px !important;
+    border-radius: 25px !important;
+}
+.navbar-brand {
+    background-color: #001220 !important;
+}
+.navbar-link {
+    background-color: #001220 !important;   
+}
+.navbar-link:hover {
+    background-color: #0c2539 !important;
+    border-radius: 15px !important;
+}
+.navbar-dropdown {
+    background-color: #001220 !important;
+    border-radius: 15px !important;
+}
+.navbar-item {
+    color: white !important;
+    margin-left: 8px !important;
+    background-color: #001220 !important;
+    border-radius: 15px !important;
+}
+.navbar-item.is-active {
+    background-color: #0c2539 !important;
+    border-radius: 15px !important;
+}
+.navbar-item:hover {
+    background-color: #0c2539 !important;
+    border-radius: 15px !important;
+}
+
+/* === notification overrides === */
+.notification {
+    padding: 12px !important;
+}
+
+/* === theme overrides === */
+.is-dark {
+    background-color: #001220 !important;
+    color: #dadada !important;
+}
+
+.is-sway {
+    border-radius: 15px !important;
+}
+.par {
+    margin-bottom: 2px !important;
+}
+.home-title {
+    font-size: 48px !important;
+    font-weight: 700 !important;
+    margin-bottom: 0px !important;
+}
+.modtext {
+    color: #fc0303;
+    text-shadow:
+        0 0 19px #fff,
+        0 0 10px #fc0303,
+        0 0 21px #fc0303;
+}
