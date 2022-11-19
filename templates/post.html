@@ -14,23 +14,23 @@
                     <article class="media">
                         <div class="media-left">
                         <figure class="image is-64x64">
-                            <img src="{{data[3]}}" class="is-sway" alt="{{data[0]}}">
+                            <img src="{{data[1][4]}}" class="is-sway" alt="{{data[1][1]}}">
                         </figure>
                         </div>
                         <div class="media-content">
                         <div class="content">
-                            <p class="par title is-4">{{data[5]}}</p>
+                            <p class="par title is-4">{{data[1][6]}}</p>
                             <span>
                                 <small>
-                                    By <a href="#">@{{data[0]}}
-                                    {% if data[1] == 1 %}
+                                    By <a href="#">@{{data[1][1]}}
+                                    {% if data[1][2] == 1 %}
                                         <span class="bi bi-patch-check is-verified"></span>
                                     {% endif %}
-                                    {% if data[2] == 1 %}
+                                    {% if data[1][3] == 1 %}
                                         <span class="modtext">[mod]</span>
                                     {% endif %}
                                 </a>
-                                <span id="time"> - {{get_post_time(data[7])}}</span></small>
+                                <span id="time"> - {{get_post_time(data[1][8])}}</span></small>
                             </span>
                         </div>
                             <nav class="level is-mobile">
@@ -39,19 +39,19 @@
                                         <span class="bi bi-share"></span>&nbsp;23
                                     </a>
                                     <a class="level-item" aria-label="like">
-                                        <span class="bi bi-hand-thumbs-up"></span>&nbsp;2192
+                                        <span id="like-0" class="bi bi-hand-thumbs-up"></span>&nbsp;{{data[0][0]}}
                                     </a>
                                 </div>
                             </nav>
                             <p>
                                 <!--if [code] is in the data[6], then wrap the text inside it as <pre> until [/code]-->
-                                {% if '[code]' in data[6] %}
-                                    {% set code = data[6].split('[code]') %}
+                                {% if '[code]' in data[1][7] %}
+                                    {% set code = data[1][7].split('[code]') %}
                                     {{code[0]}}
                                     <pre class="prettyprint" style="margin-top:15px;margin-bottom:15px;resize:vertical;overflow:auto;">{{code[1].split('[/code]')[0]}}</pre>
                                     {{code[1].split('[/code]')[1]}}
                                 {% else %}
-                                    {{data[6]}}
+                                    {{data[1][7]}}
                                 {% endif %}
                             </p>
                         </div>
@@ -60,13 +60,13 @@
                 </div>
                 
                 <div class="box round">
-                    <p class="par title is-4">Comments</p>
+                    <p class="par title is-4"><span class="bi bi-chat"></span>&nbsp;22 Comments</p>
                     <div style="padding-top: 15px;"></div>
                     <article class="media">
 
                         <figure class="media-left">
                           <p class="image is-64x64">
-                            <img src="{{data[3]}}" class="is-sway" alt="{{data[0]}}">
+                            <img src="{{data[1][4]}}" class="is-sway" alt="{{data[1][4]}}">
                           </p>
                         </figure>
                         <div class="media-content">
@@ -78,7 +78,8 @@
                                 <br>
                                 <small>
                                     <a href="#" aria-label="like"><span class="bi bi-hand-thumbs-up"></span>&nbsp;2192</a> · 
-                                    <a>Reply</a> · 3 hrs
+                                    <a>Reply</a>
+                                    <span> · 2yr</span>
                                 </small>
                             </p>
                           </div>
@@ -86,20 +87,15 @@
                           <article class="media">
                             <figure class="media-left">
                               <p class="image is-48x48">
-                                <img src="{{data[3]}}" class="is-sway" alt="{{data[0]}}">
+                                <img src="{{data[1][4]}}" class="is-sway" alt="{{data[1][1]}}">
                               </p>
                             </figure>
                             <div class="media-content">
                               <div class="content">
                                 <p>
                                     <strong>Sean Brown</strong>
-                                    <br>
-                                    Donec sollicitudin urna eget eros malesuada sagittis. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Aliquam blandit nisl a nulla sagittis, a lobortis leo feugiat.
-                                    <br>
-                                    <small>
-                                        <a href="#" aria-label="like"><span class="bi bi-hand-thumbs-up"></span>&nbsp;2192</a> · 
-                                        <a>Reply</a> · 2 hrs
-                                    </small>
+                                    <small> · 16 d</small>
+                                    <br>Donec sollicitudin urna eget eros malesuada sagittis. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Aliquam blandit nisl a nulla sagittis, a lobortis leo feugiat.<br>
                                 </p>
                               </div>
                           </article>
@@ -107,20 +103,15 @@
                             <article class="media">
                                 <figure class="media-left">
                                     <p class="image is-48x48">
-                                        <img src="{{data[3]}}" class="is-sway" alt="{{data[0]}}">
+                                        <img src="{{data[1][4]}}" class="is-sway" alt="{{data[1][1]}}">
                                     </p>
                                 </figure>
                                 <div class="media-content">
                                     <div class="content">
                                         <p>
                                             <strong>Kayli Eunice </strong>
-                                            <br>
-                                            Sed convallis scelerisque mauris, non pulvinar nunc mattis vel. Maecenas varius felis sit amet magna vestibulum euismod malesuada cursus libero. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae; Phasellus lacinia non nisl id feugiat.
-                                            <br>
-                                            <small>
-                                                <a href="#" aria-label="like"><span class="bi bi-hand-thumbs-up-fill"></span>&nbsp;2192</a> · 
-                                                <a>Reply</a> · 2 hrs
-                                            </small>
+                                            <small> · 3 hrs</small>
+                                            <br>Sed convallis scelerisque mauris, non pulvinar nunc mattis vel. Maecenas varius felis sit amet magna vestibulum euismod malesuada cursus libero. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae; Phasellus lacinia non nisl id feugiat.<br>
                                         </p>
                                     </div>
                                 </div>
@@ -131,7 +122,7 @@
                     <article class="media">
                         <figure class="media-left">
                             <p class="image is-64x64">
-                                <img src="https://hackershaven.eu/images/hackeast.png" class="is-sway" alt="{{data[0]}}">
+                                <img src="https://hackershaven.eu/images/hackeast.png" class="is-sway" alt="{{data[1][1]}}">
                             </p>
                         </figure>
                         <div class="media-content">
@@ -154,4 +145,37 @@
             <div class="column"></div>
         </div>
     </div>
+    <script>
+        $(document).ready(function() {
+            // like button animation
+            // [id^="like-"]
+            var not_filled = "bi-hand-thumbs-up";
+            var fill = "bi-hand-thumbs-up-fill";
+            $('#like-0').on('click', function(e) {
+                if ($(this).hasClass(fill)) {
+                    // change to not filled
+                    $(this).removeClass(fill);
+                    $(this).addClass(not_filled);
+
+                    // make ajax request to remove like
+                    $.ajax({
+                        url: '/api/like',
+                        type: 'POST',
+                        data: {
+                            'id': 0,
+                            'type': 'post',
+                            'action': 'remove'
+                        },
+                        success: function(data) {
+                            console.log(data);
+                        }
+                    });
+                } else {
+                    // change to filled
+                    $(this).removeClass(not_filled);
+                    $(this).addClass(fill);
+                }
+            });
+        });
+    </script>
 {% endblock %}

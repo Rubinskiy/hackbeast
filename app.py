@@ -46,7 +46,7 @@ def home():
 @app.route('/forum')
 def forum():
    cursor = mysql.connection.cursor()
-   cursor.execute('''SELECT profiles.username, profiles.is_verified, profiles.is_mod, profiles.ppic, post_id, title, timestamp FROM profiles, posts WHERE profiles.id = user_id AND type=1 ORDER BY timestamp DESC LIMIT 6''')
+   cursor.execute('''SELECT profiles.username, profiles.is_verified, profiles.is_mod, profiles.ppic, id, title, timestamp FROM profiles, posts WHERE profiles.id = user_id AND type=1 ORDER BY timestamp DESC LIMIT 6''')
    mysql.connection.commit()
    data = cursor.fetchall()
    return render_template('forum.html', data=data, get_post_time=get_post_time, limit_char=limit_char)
@@ -74,7 +74,7 @@ def create_post():
 @app.route('/forum/latest')
 def latest():
    cursor = mysql.connection.cursor()
-   cursor.execute('''SELECT profiles.username, profiles.is_verified, profiles.is_mod, profiles.ppic, post_id, title, descr, timestamp FROM profiles, posts WHERE profiles.id=user_id AND type=1 ORDER BY timestamp DESC LIMIT 10''')
+   cursor.execute('''SELECT profiles.username, profiles.is_verified, profiles.is_mod, profiles.ppic, id, title, descr, timestamp FROM profiles, posts WHERE profiles.id=user_id AND type=1 ORDER BY timestamp DESC LIMIT 10''')
    mysql.connection.commit()
    data = cursor.fetchall()
    return render_template('latest.html', data=data, get_post_time=get_post_time, limit_char=limit_char)
@@ -86,10 +86,15 @@ def forum_page(id=None, page=None):
       return redirect('/forum')
    else:
       cursor = mysql.connection.cursor()
-      cursor.execute('''SELECT profiles.username, profiles.is_verified, profiles.is_mod, profiles.ppic, post_id, title, descr, timestamp FROM profiles, posts WHERE profiles.id=user_id AND post_id=%s AND REPLACE(posts.title, ' ', '-')=%s;''', 
-      ([int(id), str(page)]))
+      cursor.execute(
+      '''
+         SELECT COUNT(*) as count, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL FROM posts WHERE posts.type=2 AND posts.post_id=%s
+         UNION ALL
+         SELECT NULL, profiles.username, profiles.is_verified, profiles.is_mod, profiles.ppic, posts.id, title, descr, timestamp FROM profiles, posts WHERE profiles.id=posts.user_id AND posts.id=%s AND REPLACE(posts.title, ' ', '-')=%s;
+      ''', 
+      ([int(id), int(id), str(page)]))
       mysql.connection.commit()
-      data = cursor.fetchone()
+      data = cursor.fetchall()
       if data == None:
          return redirect('/404')
       return render_template('post.html', data=data, get_post_time=get_post_time)
@@ -160,7 +165,7 @@ def authreg():
             return render_template("error.html", error="Uh oh, something went wrong in our system.")
          finally:
             cursor.close()
-            return render_template("login.html", msg="Account created successfully! Please login to continue.", type="success")
+            return render_template("login.html", msg="Account created! Please login to continue.", type="success")
 
 
 
