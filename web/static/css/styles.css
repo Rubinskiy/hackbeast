@@ -133,6 +133,7 @@ input[type=text], input[type=password], input[type=email] {
     color: #dadada !important;
 }
 
+/* === custom overrides === */
 .is-sway {
     border-radius: 15px !important;
 }
@@ -150,4 +151,21 @@ input[type=text], input[type=password], input[type=email] {
         0 0 19px #fff,
         0 0 10px #fc0303,
         0 0 21px #fc0303;
+}
+.verifiedtext {
+    color: #1da1f2;
+    text-shadow:
+        0 0 19px #fff,
+        0 0 10px #1da1f2,
+        0 0 21px #1da1f2;
+}
+.bg {
+    display: grid;
+    place-items: center;
+    margin: 0;
+    padding: 0 24px;
+    background-image: url("./static/svg/Wave.svg");
+    background-size: 2000px 1000px;
+    background-position: -500px 0;
+    animation: background 10s infinite alternate linear;
 }

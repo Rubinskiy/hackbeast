@@ -4,6 +4,7 @@ from flask_session import Session
 from better_profanity import profanity
 from uuid import uuid4
 import helpers.dbfunc as dbf
+import random
 import hashlib
 import datetime
 import time
@@ -26,7 +27,7 @@ custom_curse_words = [
    'arian',
    'aryan',
    'asanchez',
-   ''
+   'shit'
 ]
 profanity.load_censor_words(custom_curse_words)
 
@@ -46,7 +47,7 @@ def home():
 @app.route('/forum')
 def forum():
    cursor = mysql.connection.cursor()
-   cursor.execute('''SELECT profiles.username, profiles.is_verified, profiles.is_mod, profiles.ppic, post_id, title, timestamp FROM profiles, posts WHERE profiles.id = user_id AND type=1 ORDER BY timestamp DESC LIMIT 6''')
+   cursor.execute('''SELECT profiles.username, profiles.is_verified, profiles.is_mod, profiles.ppic, posts.id, title, timestamp FROM profiles, posts WHERE profiles.id = user_id AND type=1 ORDER BY timestamp DESC LIMIT 6''')
    mysql.connection.commit()
    data = cursor.fetchall()
    return render_template('forum.html', data=data, get_post_time=get_post_time, limit_char=limit_char)
@@ -74,7 +75,7 @@ def create_post():
 @app.route('/forum/latest')
 def latest():
    cursor = mysql.connection.cursor()
-   cursor.execute('''SELECT profiles.username, profiles.is_verified, profiles.is_mod, profiles.ppic, post_id, title, descr, timestamp FROM profiles, posts WHERE profiles.id=user_id AND type=1 ORDER BY timestamp DESC LIMIT 10''')
+   cursor.execute('''SELECT profiles.username, profiles.is_verified, profiles.is_mod, profiles.ppic, posts.id, title, descr, timestamp FROM profiles, posts WHERE profiles.id=user_id AND type=1 ORDER BY timestamp DESC LIMIT 10''')
    mysql.connection.commit()
    data = cursor.fetchall()
    return render_template('latest.html', data=data, get_post_time=get_post_time, limit_char=limit_char)
@@ -83,13 +84,24 @@ def latest():
 @app.route('/forum/<id>/<page>')
 def forum_page(id=None, page=None):
    if page == None or id == None:
-      return redirect('/forum')
+      return redirect('/404')
    else:
+      # if session['id'] does not exist
+      if not session.get("id"):
+         session_id = 0
+      else:
+         session_id = session['id']
+
       cursor = mysql.connection.cursor()
-      cursor.execute('''SELECT profiles.username, profiles.is_verified, profiles.is_mod, profiles.ppic, post_id, title, descr, timestamp FROM profiles, posts WHERE profiles.id=user_id AND post_id=%s AND REPLACE(posts.title, ' ', '-')=%s;''', 
-      ([int(id), str(page)]))
+      cursor.execute(
+      '''
+         SELECT profiles.username, profiles.is_verified, profiles.is_mod, profiles.ppic, posts.id, title, descr, timestamp FROM profiles, posts WHERE profiles.id=posts.user_id AND posts.id=%s AND REPLACE(posts.title, ' ', '-')=%s
+         UNION ALL SELECT COUNT(*), NULL, NULL, NULL, NULL, NULL, NULL, NULL FROM posts WHERE posts.type=2 AND posts.post_id=%s
+         UNION ALL SELECT COUNT(*), NULL, NULL, NULL, NULL, NULL, NULL, NULL FROM posts WHERE posts.type=2 AND posts.post_id=%s AND posts.user_id=%s;
+      ''', 
+      ([int(id), str(page), int(id), int(id), session_id]))
       mysql.connection.commit()
-      data = cursor.fetchone()
+      data = cursor.fetchall()
       if data == None:
          return redirect('/404')
       return render_template('post.html', data=data, get_post_time=get_post_time)
@@ -119,7 +131,7 @@ def authlog():
       pwd = request.form['pwd']
       pwd = hashlib.sha256(pwd.encode('utf-8')).hexdigest()
       cursor = mysql.connection.cursor()
-      cursor.execute('''SELECT id, username, is_banned, is_verified, is_mod FROM profiles WHERE email=%s AND pwd=%s or username=%s AND pwd=%s''',
+      cursor.execute('''SELECT id, username, is_banned, is_verified, is_mod, ppic FROM profiles WHERE email=%s AND pwd=%s or username=%s AND pwd=%s''',
       ([unem], [pwd], [unem], [pwd]))
       mysql.connection.commit()
       success = cursor.fetchone()
@@ -131,6 +143,7 @@ def authlog():
          session['uname'] = success[1]
          session['verified'] = success[3]
          session['mod'] = success[4]
+         session['ppic'] = success[5]
          return redirect('/')
       else:
          return render_template('login.html', msg="Invalid Email/Username or Password.")
@@ -152,22 +165,42 @@ def authreg():
          pwd = request.form['pwd']
          pwd = hashlib.sha256(pwd.encode('utf-8')).hexdigest()
          ip_address = request.remote_addr
-         cursor.execute(''' INSERT INTO profiles (name, username, email, pwd, ip_address, last_ip) VALUES(%s, %s, %s, %s, %s, %s)''', 
-         (name, username, email, pwd, ip_address, ip_address))
+         cursor.execute(''' INSERT INTO profiles (id, name, username, email, pwd, ip_address, last_ip) VALUES(%s, %s, %s, %s, %s, %s, %s)''', 
+         (''.join((random.choice('abcdefghijklmnopqrstuvwxyz1234567890') for i in range(12))), name, username, email, pwd, ip_address, ip_address))
          try:
             mysql.connection.commit()
          except mysql.IntegrityError:
             return render_template("error.html", error="Uh oh, something went wrong in our system.")
          finally:
             cursor.close()
-            return render_template("login.html", msg="Account created successfully! Please login to continue.", type="success")
+            return render_template("login.html", msg="Account created! Please login to continue.", type="success")
 
+# -----------------API-----------------#
+@app.route('/api/v1/<post_id>/<post_type>/<action>', methods=['POST'])
+def api_forum(post_id=None, post_type=None, action=None):
+   if post_id==None or post_type==None or action==None:
+      return "Invalid request", 400
+   if not session['token'] and not session['id']:
+      return redirect('/login')
+   # Like functionality
+   cursor = mysql.connection.cursor()
+   if action == "l":
+      cursor.execute('''INSERT INTO posts (posts.post_id, posts.user_id, posts.type, timestamp) SELECT %s, %s, %s, %s WHERE NOT EXISTS (SELECT * FROM posts where posts.post_id=%s AND posts.user_id=%s AND posts.type=%s);''', 
+      (post_id, session['id'], post_type, int(time.time()), post_id, session['id'], post_type))
+   elif action == "u":
+      cursor.execute('''DELETE FROM posts WHERE posts.post_id=%s AND posts.user_id=%s AND posts.type=%s;''', 
+      (post_id, session['id'], post_type))
+   elif action == "c":
+      cursor.execute('''''')
+   cursor.close()
 
-
-'''def post_request():
-    headers = {"X-API-Key" : api_key, "Content-Type" : "application/json"}
-    data = {"item" : {"name" : "test", "age" : 20}}
-    response = requests.post(api_route, data=data, headers=headers)'''
+   try:
+      mysql.connection.commit()
+   except mysql.IntegrityError:
+      return "Error", 500
+   finally:
+      cursor.close()
+      return "OK", 200
 
 # -----------------FUNCTIONS-----------------#
 def limit_char(text, limit=50, ext="..."):
