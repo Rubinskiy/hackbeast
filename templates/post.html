@@ -107,11 +107,6 @@
                                 </div>
                             </article>
                         {% endfor %}
-                        <div style="padding-top:25px;"></div>
-                        <div class="has-text-centered">
-                            <a id="load-more">Load more</a>
-                        </div>
-                        <div style="padding-top: 25px;"></div>
 
                         <!--<article class="media">
                             <figure class="media-left">
@@ -168,8 +163,13 @@
                                 </article>
                             </div>
                         </article>-->
-                        
-                        {% if session.token %}
+                    </div>
+                    <div style="padding-top:25px;"></div>
+                    <div class="has-text-centered">
+                        <p id="load-more"><a>Load more</a></p>
+                    </div>
+                    <div style="padding-top: 25px;"></div>
+                    {% if session.token %}
                         <article class="media">
                             <figure class="media-left">
                                 <p class="image is-64x64">
@@ -177,26 +177,23 @@
                                 </p>
                             </figure>
                             <div class="media-content">
-                              <div class="field">
+                            <div class="field">
                                 <p class="control">
                                     <textarea class="textarea btn-round2" name="content" placeholder="Reply as @{{session.uname}}" rows="4" minlength="1" maxlength="600" required></textarea>
                                 </p>
-                              </div>
+                            </div>
                             </div>
                         </article>
-                        {% else %}
-                            <article class="media">
-                                <figure class="media-content">
-                                    <div class="field">
-                                        <p class="is-pulled-right">Login to comment</p>
-                                    </div>
-                                </figure>
-                            </article>
-                        {% endif %}
-                    </div>
-                    {% if session.token %}
                         <div style="padding-top: 25px;"></div>
                         <span id="reply-0" class="button is-info one btn-round is-pulled-right is-fixed-top"><span class="bi bi-reply"></span>&nbsp;Reply</span>
+                    {% else %}
+                        <article class="media">
+                            <figure class="media-content">
+                                <div class="field">
+                                    <p class="is-pulled-right">Login to comment</p>
+                                </div>
+                            </figure>
+                        </article>
                     {% endif %}
                 </div>
                 
@@ -205,6 +202,7 @@
         </div>
     </div>
     <script>
+        let comment_count = "{{count.value}}";
         function change_num_of_likes(add_or_remove) {
             var likes = parseInt($('#like-0').text());
             if (add_or_remove == "add") {
@@ -300,23 +298,53 @@
                     });
                 }
             });
-            // if load-more clicked
             $('#load-more').on('click', function(e) {
                 e.preventDefault();
                 $.ajax({
                     url: '/api/v1/{{data[0][4]}}/4/c-c',
                     type: 'POST',
                     data: {
-                        'last_id': '{{count.value}}'
+                        'last_id': comment_count
                     },
                     success: function(data) {
-                        alert(data);
                         if (data != "Error") {
-                            $('#comment-box').append(data);
-                            $('#last-id').val(parseInt(last_id) + 6);
-                        } else {
-                            $('#load-more').html("No more comments");
+                            if (data.length > 0) {
+                                for (var i = 0; i < data.length; i++) {
+                                    var comment = `
+                                    <article id="` + data[i][4] + `" class="media">
+                                        <figure class="media-left">
+                                            <p class="image is-64x64">
+                                                <img src="` + data[i][3] + `" class="is-sway" alt="` + data[i][0] + `">
+                                            </p>
+                                        </figure>
+                                        <div class="media-content">
+                                            <div class="content">
+                                                <p>
+                                                    <strong>
+                                                        <a href="#">` + data[i][0] + `
+                                                        ` + (data[i][1] == "True" ? `<span class="bi bi-patch-check is-verified"></span>` : "") + `
+                                                        ` + (data[i][2] == "True" ? `<span class="modtext">[mod]</span>` : "") + `</a>
+                                                    </strong>
+                                                    <span> · ` + data[i][6] + `</span>
+                                                    <br>
+                                                    ` + data[i][5] + `
+                                                    <br>
+                                                    <small>
+                                                        <a>Reply</a> · 
+                                                        <a aria-label="replies">See replies&nbsp;<span class="bi bi-chevron-down"></span></a>
+                                                    </small>
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </article>
+                                    `;
+                                    $('#comment-box').append(comment);
+                                }
+                            } else {
+                                $('#load-more').html("No more comments");
+                            }
                         }
+                        comment_count += data.length;
                     }
                 });
             });

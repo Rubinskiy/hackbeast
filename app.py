@@ -206,6 +206,11 @@ def api_forum(post_id=None, post_type=None, action=None):
       cursor.execute('''SELECT profiles.username, profiles.is_verified, profiles.is_mod, profiles.ppic, posts.id, posts.descr, posts.timestamp FROM profiles, posts WHERE profiles.id=posts.user_id AND posts.type=3 AND posts.post_id=%s ORDER BY posts.timestamp DESC LIMIT 6 OFFSET %s;''',
       ([post_id, int(request.form['last_id'])]))
       response = cursor.fetchall()
+      # Format the time
+      response = [list(i) for i in response]
+      for i in response:
+         i[6] = get_post_time(i[6])
+      response = [tuple(i) for i in response]
    cursor.close()
 
    try:
