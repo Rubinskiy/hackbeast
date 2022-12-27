@@ -19,7 +19,10 @@
                 <!-- logo or branding image on left side -->
                 <div class="navbar-brand">
                     <img src="http://hackershaven.eu/images/logo.png" style="margin-right:12px;" alt="HackersHaven: The modern hacker forum" width="52" height="48">
-                    <div class="navbar-burger"  data-target="navbar-menu">
+                    <a class="navbar-item is-hidden-desktop" href="/">
+                        <h1 class="title has-text-white is-4">HackersHaven</h1>
+                    </a>
+                    <div class="navbar-burger" data-target="navbar-menu">
                         <span></span>
                         <span></span>
                         <span></span>
@@ -60,27 +63,40 @@
         {% block body %}{% endblock %}
         <div style="padding-top: 30px;"></div>
         <footer class="footer is-dark">
-            <hr style="border-top: 1px solid #dadada;">
             <div class="columns">
                 <div class="column is-4">
                     <div class="content">
                         <h4 class="title has-text-white is-4">HackBeast</h4>
                         <p style="font-size: 11px;" class="subtitle has-text-white">Previously named HackersHaven</p>
                         <p id="copyright" class="subtitle has-text-white is-6"></p>
+                        <small>CHANGE THIS: Site design / logo © 2022 Stack Exchange Inc; user contributions licensed under CC BY-SA. rev 2022.12.5.43077</small>
                     </div>
                 </div>
-                <div class="column is-4">
+                <div class="column is-3">
                     <div class="content">
-                        <h4 class="title has-text-white is-4">Links</h4>
+                        <h4 class="title has-text-white is-4">Company</h4>
                         <ul>
-                            <li><a class="button is-info is-outlined one btn-round" href="#">Home</a></li>
-                            <li><a class="button is-info is-outlined one btn-round" href="#">Forum</a></li>
-                            <li><a class="button is-info is-outlined one btn-round" href="#">Projects</a></li>
-                            <li><a class="button is-info is-outlined one btn-round" href="#">Contact</a></li>
+                            <li><a href="#">About</a></li>
+                            <li><a href="#">Work Here</a></li>
+                            <li><a href="#">Legal</a></li>
+                            <li><a href="#">Privacy Policy</a></li>
+                            <li><a href="#">Terms of Service</a></li>
+                            <li><a href="#">Contact Us</a></li>
                         </ul>
                     </div>
                 </div>
-                <div class="column is-4">
+                <div class="column is-2">
+                    <div class="content">
+                        <h4 class="title has-text-white is-4">Links</h4>
+                        <ul>
+                            <li><a href="#">Home</a></li>
+                            <li><a href="#">Forum</a></li>
+                            <li><a href="#">Projects</a></li>
+                            <li><a href="#">Contact</a></li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="column is-3">
                     <div class="content">
                         <h4 class="title has-text-white is-4">Social</h4>
                         <ul>
