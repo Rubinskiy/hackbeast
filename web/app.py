@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, session, redirect
+from flask import Flask, render_template, request, session, redirect, jsonify
 from flask_mysqldb import MySQL
 from flask_session import Session
 from better_profanity import profanity
@@ -66,9 +66,12 @@ def create_post():
    title = profanity.censor(request.form['title'])
    content = profanity.censor(request.form['content'])
    cursor = mysql.connection.cursor()
-   cursor.execute('''INSERT INTO posts (user_id, type, title, descr, timestamp) VALUES (%s, %s, %s, %s, %s)''', 
-   (session['id'], 1, title, content, int(time.time())))
+   cursor.execute('''INSERT INTO posts (posts.user_id, posts.type, posts.title, posts.descr, posts.timestamp) SELECT %s, %s, %s, %s, %s WHERE NOT EXISTS (SELECT * FROM posts where posts.title=%s AND posts.user_id=%s AND posts.type=%s);''', 
+   (session['id'], 1, title, content, int(time.time()), title, session['id'], 1))
    mysql.connection.commit()
+   # if post with the same title already exists
+   if cursor.rowcount == 0:
+      return render_template('create.html', msg="Post with the same title already exists. Please try another title for your post.")
    cursor.close()
    return redirect('/forum')
 
@@ -97,14 +100,19 @@ def forum_page(id=None, page=None):
       '''
          SELECT profiles.username, profiles.is_verified, profiles.is_mod, profiles.ppic, posts.id, title, descr, timestamp FROM profiles, posts WHERE profiles.id=posts.user_id AND posts.id=%s AND REPLACE(posts.title, ' ', '-')=%s
          UNION ALL SELECT COUNT(*), NULL, NULL, NULL, NULL, NULL, NULL, NULL FROM posts WHERE posts.type=2 AND posts.post_id=%s
-         UNION ALL SELECT COUNT(*), NULL, NULL, NULL, NULL, NULL, NULL, NULL FROM posts WHERE posts.type=2 AND posts.post_id=%s AND posts.user_id=%s;
+         UNION ALL SELECT COUNT(*), NULL, NULL, NULL, NULL, NULL, NULL, NULL FROM posts WHERE posts.type=2 AND posts.post_id=%s AND posts.user_id=%s
+         UNION ALL SELECT COUNT(*), NULL, NULL, NULL, NULL, NULL, NULL, NULL FROM posts WHERE posts.type=3 AND posts.post_id=%s;
       ''', 
-      ([int(id), str(page), int(id), int(id), session_id]))
+      ([int(id), str(page), int(id), int(id), session_id, int(id)]))
       mysql.connection.commit()
       data = cursor.fetchall()
       if data == None:
          return redirect('/404')
-      return render_template('post.html', data=data, get_post_time=get_post_time)
+      cursor.execute('''SELECT profiles.username, profiles.is_verified, profiles.is_mod, profiles.ppic, posts.id, posts.descr, posts.timestamp FROM profiles, posts WHERE profiles.id=posts.user_id AND posts.type=3 AND posts.post_id=%s ORDER BY posts.timestamp DESC LIMIT 6;''',
+      ([int(id)]))
+      
+      comments = cursor.fetchall()
+      return render_template('post.html', data=data, comments=comments, get_post_time=get_post_time)
       cursor.close()
    return page
 
@@ -178,10 +186,9 @@ def authreg():
 # -----------------API-----------------#
 @app.route('/api/v1/<post_id>/<post_type>/<action>', methods=['POST'])
 def api_forum(post_id=None, post_type=None, action=None):
+   response = ""
    if post_id==None or post_type==None or action==None:
       return "Invalid request", 400
-   if not session['token'] and not session['id']:
-      return redirect('/login')
    # Like functionality
    cursor = mysql.connection.cursor()
    if action == "l":
@@ -190,8 +197,20 @@ def api_forum(post_id=None, post_type=None, action=None):
    elif action == "u":
       cursor.execute('''DELETE FROM posts WHERE posts.post_id=%s AND posts.user_id=%s AND posts.type=%s;''', 
       (post_id, session['id'], post_type))
+   # Comment functionality
    elif action == "c":
-      cursor.execute('''''')
+      post_content = profanity.censor(request.form['content'])
+      cursor.execute('''INSERT INTO posts (posts.post_id, posts.user_id, posts.type, posts.descr, timestamp) VALUES(%s, %s, %s, %s, %s);''',
+      (post_id, session['id'], post_type, post_content, int(time.time())))
+   elif action == "c-c":
+      cursor.execute('''SELECT profiles.username, profiles.is_verified, profiles.is_mod, profiles.ppic, posts.id, posts.descr, posts.timestamp FROM profiles, posts WHERE profiles.id=posts.user_id AND posts.type=3 AND posts.post_id=%s ORDER BY posts.timestamp DESC LIMIT 6 OFFSET %s;''',
+      ([post_id, int(request.form['last_id'])]))
+      response = cursor.fetchall()
+      # Format the time
+      response = [list(i) for i in response]
+      for i in response:
+         i[6] = get_post_time(i[6])
+      response = [tuple(i) for i in response]
    cursor.close()
 
    try:
@@ -200,7 +219,13 @@ def api_forum(post_id=None, post_type=None, action=None):
       return "Error", 500
    finally:
       cursor.close()
-      return "OK", 200
+      if (action == "c-c"):
+         return jsonify(response)
+      else:
+         return "OK", 200
+         
+      # LOAD MORE ERROR
+      # AND IF NOT LOGIN THEN DONT MAKE THE LOAD MORE EXISST OR SOMETHN
 
 # -----------------FUNCTIONS-----------------#
 def limit_char(text, limit=50, ext="..."):

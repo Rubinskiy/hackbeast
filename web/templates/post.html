@@ -6,6 +6,7 @@
 {% endblock %}
 
 {% block body %}
+{% set count = namespace(value=0) %}
     <div class="container is-fluid">
         <div class="columns">
             <div class="column"></div>
@@ -28,9 +29,9 @@
                                     {% endif %}
                                     {% if data[0][2] == 1 %}
                                         <span class="modtext">[mod]</span>
-                                    {% endif %}
-                                </a>
-                                <span id="time"> - {{get_post_time(data[0][7])}}</span></small>
+                                    {% endif %}</a>
+                                    <span id="time"> - {{get_post_time(data[0][7])}}</span>
+                                </small>
                             </span>
                         </div>
                             <nav class="level is-mobile">
@@ -39,7 +40,7 @@
                                         <span class="bi bi-share"></span>
                                     </a>
                                     <a class="level-item" aria-label="comment">
-                                        <span id="comms-0" class="bi bi-chat">&nbsp;36</span>
+                                        <span id="comms-0" class="bi bi-chat">&nbsp;{{data[3][0]}}</span>
                                     </a>
                                     <a class="level-item" aria-label="like">
                                         {% if session['id'] %}
@@ -55,27 +56,58 @@
                                 </div>
                             </nav>
                             <p>
-                                <!--if [code] is in the data[6], then wrap the text inside it as <pre> until [/code]-->
-                                {% if '[code]' in data[0][6] %}
-                                    {% set code = data[0][6].split('[code]') %}
-                                    {{code[0]}}
-                                    <pre class="prettyprint" style="margin-top:15px;margin-bottom:15px;resize:vertical;overflow:auto;">{{code[1].split('[/code]')[0]}}</pre>
-                                    {{code[1].split('[/code]')[1]}}
-                                {% else %}
-                                    {{data[0][6]}}
-                                {% endif %}
+                                {% for code in data[0][6].split('[code]') %}
+                                    {% if loop.index > 1 %}
+                                        <pre class="prettyprint prefield">{{code.split('[/code]')[0]}}</pre>
+                                        {{code.split('[/code]')[1]}}
+                                    {% else %}
+                                        {{code}}
+                                    {% endif %}
+                                {% endfor %}
                             </p>
                         </div>
                     </article>
                     <div style="padding-top: 25px;"></div>
                 </div>
-                
+
                 <div id="comms-1" class="box round">
-                    <p class="par title is-4"><span class="bi bi-chat"></span>&nbsp;22 Comments</p>
+                    <p id="comms-num" class="par title is-4"><span class="bi bi-chat"></span>&nbsp;{{data[3][0]}} Comment(s)</p>
                     <div style="padding-top: 15px;"></div>
                     <div id="comment-box">
-                        <article class="media">
+                        
+                        {% for comment in comments %}
+                            {% set count.value = count.value + 1 %}
+                            <article id="{{count.value}}" class="media">
+                                <figure class="media-left">
+                                    <p class="image is-64x64">
+                                        <img src="{{comment[3]}}" class="is-sway" alt="{{comment[0]}}">
+                                    </p>
+                                </figure>
+                                <div class="media-content">
+                                    <div class="content">
+                                        <p>
+                                            <a href="#">{{comment[0]}}
+                                            {% if comment[1] == 1 %}
+                                                <span class="bi bi-patch-check is-verified"></span>
+                                            {% endif %}
+                                            {% if comment[2] == 1 %}
+                                                <span class="modtext">[mod]</span>
+                                            {% endif %}</a>
+                                            <span> · {{get_post_time(comment[6])}}</span>
+                                            <br>
+                                            {{comment[5]}}
+                                            <br>
+                                            <small>
+                                                <a>Reply</a> · 
+                                                <a aria-label="replies">See replies&nbsp;<span class="bi bi-chevron-down"></span></a>
+                                            </small>
+                                        </p>
+                                    </div>
+                                </div>
+                            </article>
+                        {% endfor %}
 
+                        <!--<article class="media">
                             <figure class="media-left">
                               <p class="image is-64x64">
                                 <img src="{{data[0][3]}}" class="is-sway" alt="{{data[0][3]}}">
@@ -129,29 +161,42 @@
                                     </div>
                                 </article>
                             </div>
-                        </article>
-                        
+                        </article>-->
+                    </div>
+                    {% if data[3][0] | int > 0 %}
+                    <div style="padding-top: 15px;"></div>
+                    <div class="has-text-centered">
+                        <button id="load-more" class="button is-light is-rounded">Load more comments</button>
+                    </div>
+                    
+                    {% endif %}
+                    <div style="padding-top: 25px;"></div>
+                    {% if session.token %}
                         <article class="media">
                             <figure class="media-left">
                                 <p class="image is-64x64">
-                                    <img src="https://hackershaven.eu/images/hackeast.png" class="is-sway" alt="{{data[0][0]}}">
+                                    <img src="{{session.ppic}}" class="is-sway" alt="{{data[0][0]}}">
                                 </p>
                             </figure>
                             <div class="media-content">
-                              <div class="field">
+                            <div class="field">
                                 <p class="control">
-                                    {% if session.token %}
-                                        <textarea class="textarea btn-round2" name="content" placeholder="Reply as @{{session.uname}}" rows="4" minlength="1" maxlength="600" required></textarea>
-                                    {% else %}
-                                        <textarea class="textarea btn-round2" name="content" placeholder="Login to comment.." rows="4" minlength="1" maxlength="600" disabled required></textarea>
-                                    {% endif %}
+                                    <textarea class="textarea btn-round2" name="content" placeholder="Reply as @{{session.uname}}" rows="4" minlength="1" maxlength="600" required></textarea>
                                 </p>
-                              </div>
+                            </div>
                             </div>
                         </article>
-                    </div>
-                    <div style="padding-top: 25px;"></div>
-                    <span id="reply-0" class="button is-info one btn-round is-pulled-right is-fixed-top"><span class="bi bi-reply"></span>&nbsp;Reply</span>
+                        <div style="padding-top: 25px;"></div>
+                        <span id="reply-0" class="button is-info one btn-round is-pulled-right is-fixed-top"><span class="bi bi-reply"></span>&nbsp;Reply</span>
+                    {% else %}
+                        <article class="media">
+                            <figure class="media-content">
+                                <div class="field">
+                                    <p class="is-pulled-right">Login to comment</p>
+                                </div>
+                            </figure>
+                        </article>
+                    {% endif %}
                 </div>
                 
             </div>
@@ -159,6 +204,7 @@
         </div>
     </div>
     <script>
+        let comment_count = "{{count.value}}";
         function change_num_of_likes(add_or_remove) {
             var likes = parseInt($('#like-0').text());
             if (add_or_remove == "add") {
@@ -209,7 +255,6 @@
                             if (data == "OK") {
                                 $('textarea[name="content"]').val("");
                                 $('#comms-0').click();
-                                // add comment to page
                                 var comment = `
                                 <article class="media">
                                     <figure class="media-left">
@@ -218,26 +263,92 @@
                                         </p>
                                     </figure>
                                     <div class="media-content">
-                                    <div class="content">
-                                        <p>
-                                            <strong>{{session.uname}}</strong>
-                                            <br>
-                                            ` + content + `
-                                            <br>
-                                            <small>
-                                                <a href="#" aria-label="like"><span class="bi bi-hand-thumbs-up"></span>&nbsp;2192</a> · 
-                                                <a>Reply</a>
+                                        <div class="content">
+                                            <p>
+                                                <a href="#">{{session.uname}}
+                                                {% if session.verified %}
+                                                    <span class="bi bi-patch-check is-verified"></span>
+                                                {% endif %}
+                                                {% if session.mod %}
+                                                    <span class="modtext">[mod]</span>
+                                                {% endif %}</a>
                                                 <span> · Just Now</span>
-                                            </small>
-                                        </p>
+                                                <br>
+                                                ` + content + `
+                                                <br>
+                                                <small>
+                                                    <a>Reply</a> · 
+                                                    <a aria-label="replies">See replies&nbsp;<span class="bi bi-chevron-down"></span></a>
+                                                </small>
+                                            </p>
+                                        </div>
                                     </div>
-                                </article>`;
+                                </article>
+                                `;
+                                
                                 $('#comment-box').prepend(comment);
+                                var num_of_comms = parseInt($('#comms-num').text());
+                                $('#comms-num').html("<span class=\"bi bi-chat\"></span>&nbsp;" + (num_of_comms + 1) + " Comment(s)");
+                                $('#comms-0').html("&nbsp;" + (num_of_comms + 1));
+                            } else {
+                                alert("Couldn't post comment. Please try again later.");
                             }
                         }
                     });
                 }
             });
+            $('#load-more').on('click', function(e) {
+                e.preventDefault();
+                $(this).addClass('is-loading');
+                $.ajax({
+                    url: '/api/v1/{{data[0][4]}}/4/c-c',
+                    type: 'POST',
+                    data: {
+                        'last_id': comment_count
+                    },
+                    success: function(data) {
+                        if (data != "Error") {
+                            if (data.length > 0) {
+                                for (var i = 0; i < data.length; i++) {
+                                    var comment = `
+                                    <article id="` + data[i][4] + `" class="media">
+                                        <figure class="media-left">
+                                            <p class="image is-64x64">
+                                                <img src="` + data[i][3] + `" class="is-sway" alt="` + data[i][0] + `">
+                                            </p>
+                                        </figure>
+                                        <div class="media-content">
+                                            <div class="content">
+                                                <p>
+                                                    <a href="#">` + data[i][0] + `
+                                                    ` + (data[i][1] == "True" ? `<span class="bi bi-patch-check is-verified"></span>` : "") + `
+                                                    ` + (data[i][2] == "True" ? `<span class="modtext">[mod]</span>` : "") + `</a>
+                                                    <span> · ` + data[i][6] + `</span>
+                                                    <br>
+                                                    ` + data[i][5] + `
+                                                    <br>
+                                                    <small>
+                                                        <a>Reply</a> · 
+                                                        <a aria-label="replies">See replies&nbsp;<span class="bi bi-chevron-down"></span></a>
+                                                    </small>
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </article>
+                                    `;
+                                    $('#comment-box').append(comment);
+                                }
+                            } else {
+                                $('#load-more').html("No more comments");
+                                $('#load-more').attr('disabled', true);
+                            }
+                        }
+                        comment_count += data.length;
+                    }
+                });
+                $(this).removeClass('is-loading');
+            });
+            
             // smooth scroll to anchor
             $('#comms-0').on('click', function(e) {
                 e.preventDefault();
