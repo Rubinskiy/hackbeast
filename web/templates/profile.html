@@ -54,18 +54,6 @@
                                         {% endif %}
                                     </a>
                                 </div>
-                                <div class="level-right">
-                                    {% if session['id'] %}
-                                        {% if session['uname'] == data[0][0] %}
-                                            <a id="open-delete-modal" class="level-item" aria-label="delete" data-target="delete-modal">
-                                                <span class="bi bi-trash" style="color:red;"></span>
-                                            </a>
-                                            <a class="level-item" aria-label="settings">
-                                                <span class="bi bi-pencil-square"></span>
-                                            </a>
-                                        {% endif %}
-                                    {% endif %}
-                                </div>
                             </nav>
                             <p>
                                 {% for code in data[0][6].split('[code]') %}
@@ -215,22 +203,6 @@
             <div class="column"></div>
         </div>
     </div>
-
-    <div id="delete-modal" class="modal">
-        <div class="modal-background"></div>
-        <div class="modal-content">
-            <div class="box round">
-            <p><strong>Are you sure you want to delete this post?</strong></p>
-            <small>This action cannot be undone.</small>
-            <div style="padding-top: 25px;"></div>
-            <div class="buttons is-right">
-                <a id="delete-post" class="button is-danger one btn-round is-fixed-top">Yes, delete it</a>
-                <a id="close-delete-modal" class="button is-info one btn-round is-fixed-top">No, keep it</a>
-            </div>
-            </div>
-        </div>
-    </div>
-
     <script>
         let comment_count = "{{count.value}}";
         function change_num_of_likes(add_or_remove) {
@@ -252,6 +224,9 @@
                     $.ajax({
                         url: '/api/v1/{{data[0][4]}}/2/u',
                         type: 'POST',
+                        data: {
+                            'usmcngzyznoy': '🤔'
+                        }
                     });
                 } else {
                     $(this).removeClass(not_filled);
@@ -260,6 +235,9 @@
                     $.ajax({
                         url: '/api/v1/{{data[0][4]}}/2/l',
                         type: 'POST',
+                        data: {
+                            'usmcngzyznoy': '🤔'
+                        }
                     });
                 }
             });
@@ -377,37 +355,6 @@
                 $('html, body').animate({
                     scrollTop: $('#comms-1').offset().top
                 }, 800);
-            });
-
-            // open modal
-            $('#open-delete-modal').on('click', function(e) {
-                e.preventDefault();
-                $('#delete-modal').addClass('is-active');
-            });
-
-            // close modal
-            $('#close-delete-modal').on('click', function(e) {
-                e.preventDefault();
-                $('#delete-modal').removeClass('is-active');
-            });
-
-            // delete post
-            $('#delete-post').on('click', function(e) {
-                e.preventDefault();
-                $.ajax({
-                    url: '/api/v1/{{data[0][4]}}/1/d',
-                    type: 'POST',
-                    data: {
-                        'bG9va2luZyB0byB3b3JrIHdpdGggdXM/': '🤔'
-                    },
-                    success: function(data) {
-                        if (data == "OK") {
-                            window.location.href = "/forum";
-                        } else {
-                            alert("Couldn't delete post. Please try again later.");
-                        }
-                    }
-                });
             });
         });
     </script>

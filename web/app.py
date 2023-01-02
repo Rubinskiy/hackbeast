@@ -116,6 +116,27 @@ def forum_page(id=None, page=None):
       cursor.close()
    return page
 
+@app.route('/profile/<username>')
+def profile(username=None):
+   if username == None:
+      return redirect('/404')
+   else:
+      cursor = mysql.connection.cursor()
+      cursor.execute('''SELECT id, username, ppic, is_verified, is_mod FROM profiles WHERE username=%s''', ([username]))
+      mysql.connection.commit()
+      data = cursor.fetchall()
+      if data == None:
+         return redirect('/404')
+      cursor.execute('''SELECT COUNT(*) FROM posts WHERE posts.user_id=%s AND posts.type=1''', ([data[0][0]]))
+      mysql.connection.commit()
+      posts = cursor.fetchall()
+      cursor.execute('''SELECT COUNT(*) FROM posts WHERE posts.user_id=%s AND posts.type=2''', ([data[0][0]]))
+      mysql.connection.commit()
+      comments = cursor.fetchall()
+      return render_template('profile.html', data=data, posts=posts, comments=comments)
+      cursor.close()
+   return username
+
 #-----------------AUTH-----------------#
 @app.route('/login')
 def login():
@@ -206,11 +227,14 @@ def api_forum(post_id=None, post_type=None, action=None):
       cursor.execute('''SELECT profiles.username, profiles.is_verified, profiles.is_mod, profiles.ppic, posts.id, posts.descr, posts.timestamp FROM profiles, posts WHERE profiles.id=posts.user_id AND posts.type=3 AND posts.post_id=%s ORDER BY posts.timestamp DESC LIMIT 6 OFFSET %s;''',
       ([post_id, int(request.form['last_id'])]))
       response = cursor.fetchall()
-      # Format the time
       response = [list(i) for i in response]
       for i in response:
          i[6] = get_post_time(i[6])
       response = [tuple(i) for i in response]
+   # Delete post
+   elif action == "d":
+      cursor.execute('''DELETE FROM posts WHERE posts.id=%s AND posts.user_id=%s AND posts.type=%s;''', 
+      (post_id, session['id'], post_type))
    cursor.close()
 
    try:
@@ -223,9 +247,6 @@ def api_forum(post_id=None, post_type=None, action=None):
          return jsonify(response)
       else:
          return "OK", 200
-         
-      # LOAD MORE ERROR
-      # AND IF NOT LOGIN THEN DONT MAKE THE LOAD MORE EXISST OR SOMETHN
 
 # -----------------FUNCTIONS-----------------#
 def limit_char(text, limit=50, ext="..."):
