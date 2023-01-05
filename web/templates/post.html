@@ -175,12 +175,11 @@
                             </div>
                         </article>-->
                     </div>
-                    {% if data[3][0] | int > 0 %}
-                    <div style="padding-top: 15px;"></div>
-                    <div class="has-text-centered">
-                        <button id="load-more" class="button is-light is-rounded">Load more comments</button>
-                    </div>
-                    
+                    {% if data[3][0]|int > 6 %}
+                        <div style="padding-top: 15px;"></div>
+                        <div class="has-text-centered">
+                            <button id="load-more" class="button is-light is-rounded">Load more comments</button>
+                        </div>
                     {% endif %}
                     <div style="padding-top: 25px;"></div>
                     {% if session.token %}
