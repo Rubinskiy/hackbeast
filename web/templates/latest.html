@@ -29,8 +29,8 @@
                             <div class="content">
                                 <p class="par title is-4">{{post[5]}}</p>
                                 <p>
-                                    {% if post[6]|length > 120 %}
-                                        {{ post[6][:120] }}
+                                    {% if post[6]|length > 500 %}
+                                        {{ post[6][:500] }}
                                         <span class="is-hidden-mobile">. . .</span>
                                         <a href="/forum/{{post[4]}}/{{post[5].replace(' ', '-')}}">Read more</a>
                                     {% else %}

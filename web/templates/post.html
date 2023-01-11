@@ -73,7 +73,7 @@
                                         <pre class="prettyprint prefield">{{code.split('[/code]')[0]}}</pre>
                                         {{code.split('[/code]')[1]}}
                                     {% else %}
-                                        {{code}}
+                                        {{code|nl2br}}
                                     {% endif %}
                                 {% endfor %}
                             </p>
@@ -192,7 +192,7 @@
                             <div class="media-content">
                             <div class="field">
                                 <p class="control">
-                                    <textarea class="textarea btn-round2" name="content" placeholder="Reply as @{{session.uname}}" rows="4" minlength="1" maxlength="600" required></textarea>
+                                    <textarea class="textarea btn-round2" name="content" placeholder="Comment as @{{session.uname}}" rows="4" minlength="1" maxlength="600" required></textarea>
                                 </p>
                             </div>
                             </div>

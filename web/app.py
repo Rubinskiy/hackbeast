@@ -4,6 +4,7 @@ from flask_session import Session
 from better_profanity import profanity
 from uuid import uuid4
 import helpers.dbfunc as dbf
+from helpers.filters import nl2br
 import random
 import hashlib
 import datetime
@@ -20,6 +21,8 @@ app.config['MYSQL_USER'] = 'root'
 app.config['MYSQL_PASSWORD'] = ''
 app.config['MYSQL_DB'] = 'superbarreldb'
 mysql = MySQL(app)
+
+app.jinja_env.filters['nl2br'] = nl2br
 
 # https://github.com/snguyenthanh/better_profanity/blob/master/better_profanity/profanity_wordlist.txt
 custom_curse_words = [
