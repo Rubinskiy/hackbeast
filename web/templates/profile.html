@@ -1,12 +1,26 @@
 {% extends 'base.html' %}
 
 {% block head %}
-    <title>Post</title>
+    <title>@{{data[1]}}'s Profile</title>
     <script src="https://cdn.jsdelivr.net/gh/google/code-prettify@master/loader/run_prettify.js"></script>
+    <style>
+        .hoverdiv{
+            position: absolute;
+            z-index: 1;
+            display: none;
+            top: 0px;
+            left: 0px;
+            text-align: center;
+            font-size: 24px;
+            height: 64px;
+            width: 100%;
+            border-radius: 15px;
+            background-color: gainsboro;
+        }
+    </style>
 {% endblock %}
 
 {% block body %}
-{% set count = namespace(value=0) %}
     <div class="container is-fluid">
         <div class="columns">
             <div class="column"></div>
@@ -14,347 +28,102 @@
                 <div class="box round">
                     <article class="media">
                         <div class="media-left">
-                        <figure class="image is-64x64">
-                            <img src="{{data[0][3]}}" class="is-sway" alt="{{data[0][0]}}">
-                        </figure>
-                        </div>
-                        <div class="media-content">
-                        <div class="content">
-                            <p class="par title is-4">{{data[0][5]}}</p>
-                            <span>
-                                <small>
-                                    By <a href="#">@{{data[0][0]}}
-                                    {% if data[0][1] == 1 %}
-                                        <span class="bi bi-patch-check is-verified"></span>
+                            <figure class="image is-64x64">
+                                {% if session['id'] %}
+                                    {% if session['uname'] == data[1] %}
+                                        <div class="imgcontain">
+                                            <img src="{{data[2]}}" class="is-sway" alt="{{data[1]}}'s Profile Picture">
+                                            <div class="hoverdiv">
+                                                <div style="padding-top: 16px;">
+                                                    <strong><a href="#"><span class="bi bi-pencil"></span></a></strong>
+                                                </div>
+                                            </div>
+                                        </div><br />
+                                    {% else %}
+                                        <img src="{{data[2]}}" class="is-sway" alt="{{data[1]}}'s Profile Picture">
                                     {% endif %}
-                                    {% if data[0][2] == 1 %}
+                                {% else %}
+                                    <img src="{{data[2]}}" class="is-sway" alt="{{data[1]}}'s Profile Picture">
+                                {% endif %}
+                            </figure>
+                        </div>
+                        <div class="media-content" style="overflow: hidden;">
+                            <div class="content">
+                                <p class="par title is-4">
+                                    <a href="/profile/{{data[1]}}">@{{data[1]}}
+                                    {% if data[3] == 1 %}
+                                        <span class="bi bi-patch-check is-verified" style="font-size: 18px !important;"></span>
+                                    {% endif %}
+                                    {% if data[4] == 1 %}
                                         <span class="modtext">[mod]</span>
                                     {% endif %}</a>
-                                    <span id="time"> - {{get_post_time(data[0][7])}}</span>
-                                </small>
-                            </span>
-                        </div>
-                            <nav class="level is-mobile">
-                                <div class="level-left">
-                                    <a class="level-item" aria-label="share">
-                                        <span class="bi bi-share"></span>
-                                    </a>
-                                    <a class="level-item" aria-label="comment">
-                                        <span id="comms-0" class="bi bi-chat">&nbsp;{{data[3][0]}}</span>
-                                    </a>
-                                    <a class="level-item" aria-label="like">
-                                        {% if session['id'] %}
-                                            {% if data[2][0]|int == 1 %}
-                                                <span id="like-0" class="bi bi-hand-thumbs-up-fill">&nbsp;{{data[1][0]}}</span>
-                                            {% else %}
-                                                <span id="like-0" class="bi bi-hand-thumbs-up">&nbsp;{{data[1][0]}}</span>
-                                            {% endif %}
-                                        {% else %}
-                                            <span onclick="alert('Gotta login to do that.');" class="bi bi-hand-thumbs-up">&nbsp;{{data[1][0]}}</span>
-                                        {% endif %}
-                                    </a>
+                                </p>
+                            </div>
+                            <div class="columns">
+                                <div class="column">
+                                    <div class="columns is-mobile">
+                                        <div class="column is-1">
+                                            <a href="#"><span class="bi bi-instagram"></span></a>
+                                        </div>
+                                        <div class="column is-1">
+                                            <a href="#"><span class="bi bi-twitter"></span></a>
+                                        </div>
+                                        <div class="column is-1">
+                                            <a href="#"><span class="bi bi-github"></span></a>
+                                        </div>
+                                        <div class="column is-1">
+                                            <a href="#"><span class="bi bi-linkedin"></span></a>
+                                        </div>
+                                    </div>
+                                    <p>
+                                        <strong>Bio:</strong> Fullstack Developer
+                                    </p>
                                 </div>
-                            </nav>
-                            <p>
-                                {% for code in data[0][6].split('[code]') %}
-                                    {% if loop.index > 1 %}
-                                        <pre class="prettyprint prefield">{{code.split('[/code]')[0]}}</pre>
-                                        {{code.split('[/code]')[1]}}
-                                    {% else %}
-                                        {{code}}
-                                    {% endif %}
-                                {% endfor %}
-                            </p>
+                                <div class="column">
+                                    <p>
+                                        {% if data[3] == 1 %}
+                                            This account is <a href="#" style="text-decoration: underline;">verified</a> <span class="bi bi-patch-check is-verified"></span><br />
+                                        {% endif %} 
+                                        {% if data[4] == 1 %}
+                                            This is a <span class="modtext"><a href="#"style="text-decoration: underline; color: #fc0547;">[moderator]</a></span> account.<br />
+                                        {% endif %}
+                                        {{data[1]}} has made {{stats[0][0]}} post(s).<br />
+                                        <strong>Joined:</strong> {{data[5]|string}}.
+                                    </p>
+                                </div>
+                            </div>
+                            {% if session['id'] %}
+                                {% if session['uname'] == data[1] %}
+                                    <hr />
+                                    <div class="columns">
+                                        <div class="column">
+                                            <a href="#">Edit profile <span class="bi bi-pencil" style="font-size: 13px;"></span></a><br />
+                                            <small style="font-size:11px;">Your profile and changes will be visible to everyone.</small>
+                                        </div>
+                                        <div class="column">
+                                            <a href="#">Settings <span class="bi bi-gear" style="font-size: 13px;"></span></a><br />
+                                            <small style="font-size:11px;">Review the settings to your account here.</small>
+                                        </div>
+                                    </div>
+                                {% endif %}
+                            {% endif %}
                         </div>
                     </article>
                     <div style="padding-top: 25px;"></div>
                 </div>
 
-                <div id="comms-1" class="box round">
-                    <p id="comms-num" class="par title is-4"><span class="bi bi-chat"></span>&nbsp;{{data[3][0]}} Comment(s)</p>
-                    <div style="padding-top: 15px;"></div>
-                    <div id="comment-box">
-                        
-                        {% for comment in comments %}
-                            {% set count.value = count.value + 1 %}
-                            <article id="{{count.value}}" class="media">
-                                <figure class="media-left">
-                                    <p class="image is-64x64">
-                                        <img src="{{comment[3]}}" class="is-sway" alt="{{comment[0]}}">
-                                    </p>
-                                </figure>
-                                <div class="media-content">
-                                    <div class="content">
-                                        <p>
-                                            <a href="#">{{comment[0]}}
-                                            {% if comment[1] == 1 %}
-                                                <span class="bi bi-patch-check is-verified"></span>
-                                            {% endif %}
-                                            {% if comment[2] == 1 %}
-                                                <span class="modtext">[mod]</span>
-                                            {% endif %}</a>
-                                            <span> · {{get_post_time(comment[6])}}</span>
-                                            <br>
-                                            {{comment[5]}}
-                                            <br>
-                                            <small>
-                                                <a>Reply</a> · 
-                                                <a aria-label="replies">See replies&nbsp;<span class="bi bi-chevron-down"></span></a>
-                                            </small>
-                                        </p>
-                                    </div>
-                                </div>
-                            </article>
-                        {% endfor %}
-
-                        <!--<article class="media">
-                            <figure class="media-left">
-                              <p class="image is-64x64">
-                                <img src="{{data[0][3]}}" class="is-sway" alt="{{data[0][3]}}">
-                              </p>
-                            </figure>
-                            <div class="media-content">
-                              <div class="content">
-                                <p>
-                                    <strong>Barbara Middleton</strong>
-                                    <br>
-                                    Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis porta eros lacus, nec ultricies elit blandit non. Suspendisse pellentesque mauris sit amet dolor blandit rutrum. Nunc in tempus turpis.
-                                    <br>
-                                    <small>
-                                        <a href="#" aria-label="like"><span class="bi bi-hand-thumbs-up"></span>&nbsp;2192</a> · 
-                                        <a>Reply</a>
-                                        <span> · 2yr</span>
-                                    </small>
-                                </p>
-                              </div>
-                          
-                              <article class="media">
-                                <figure class="media-left">
-                                  <p class="image is-48x48">
-                                    <img src="{{data[0][3]}}" class="is-sway" alt="{{data[0][0]}}">
-                                  </p>
-                                </figure>
-                                <div class="media-content">
-                                  <div class="content">
-                                    <p>
-                                        <strong>Sean Brown</strong>
-                                        <small> · 16 d</small>
-                                        <br>Donec sollicitudin urna eget eros malesuada sagittis. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Aliquam blandit nisl a nulla sagittis, a lobortis leo feugiat.<br>
-                                    </p>
-                                  </div>
-                              </article>
-                          
-                                <article class="media">
-                                    <figure class="media-left">
-                                        <p class="image is-48x48">
-                                            <img src="{{data[0][3]}}" class="is-sway" alt="{{data[0][0]}}">
-                                        </p>
-                                    </figure>
-                                    <div class="media-content">
-                                        <div class="content">
-                                            <p>
-                                                <strong>Kayli Eunice </strong>
-                                                <small> · 3 hrs</small>
-                                                <br>Sed convallis scelerisque mauris, non pulvinar nunc mattis vel. Maecenas varius felis sit amet magna vestibulum euismod malesuada cursus libero. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae; Phasellus lacinia non nisl id feugiat.<br>
-                                            </p>
-                                        </div>
-                                    </div>
-                                </article>
-                            </div>
-                        </article>-->
-                    </div>
-                    {% if data[3][0] | int > 0 %}
-                    <div style="padding-top: 15px;"></div>
-                    <div class="has-text-centered">
-                        <button id="load-more" class="button is-light is-rounded">Load more comments</button>
-                    </div>
-                    
-                    {% endif %}
-                    <div style="padding-top: 25px;"></div>
-                    {% if session.token %}
-                        <article class="media">
-                            <figure class="media-left">
-                                <p class="image is-64x64">
-                                    <img src="{{session.ppic}}" class="is-sway" alt="{{data[0][0]}}">
-                                </p>
-                            </figure>
-                            <div class="media-content">
-                            <div class="field">
-                                <p class="control">
-                                    <textarea class="textarea btn-round2" name="content" placeholder="Reply as @{{session.uname}}" rows="4" minlength="1" maxlength="600" required></textarea>
-                                </p>
-                            </div>
-                            </div>
-                        </article>
-                        <div style="padding-top: 25px;"></div>
-                        <span id="reply-0" class="button is-info one btn-round is-pulled-right is-fixed-top"><span class="bi bi-reply"></span>&nbsp;Reply</span>
-                    {% else %}
-                        <article class="media">
-                            <figure class="media-content">
-                                <div class="field">
-                                    <p class="is-pulled-right">Login to comment</p>
-                                </div>
-                            </figure>
-                        </article>
-                    {% endif %}
-                </div>
                 
             </div>
             <div class="column"></div>
         </div>
     </div>
     <script>
-        let comment_count = "{{count.value}}";
-        function change_num_of_likes(add_or_remove) {
-            var likes = parseInt($('#like-0').text());
-            if (add_or_remove == "add") {
-                $('#like-0').html("&nbsp;" + (likes + 1));
-            } else {
-                $('#like-0').html("&nbsp;" + (likes - 1));
-            }
-        }
-        $(document).ready(function() {
-            var not_filled = "bi-hand-thumbs-up";
-            var fill = "bi-hand-thumbs-up-fill";
-            $('#like-0').on('click', function(e) {
-                if ($(this).hasClass(fill)) {
-                    $(this).removeClass(fill);
-                    $(this).addClass(not_filled);
-                    change_num_of_likes();
-                    $.ajax({
-                        url: '/api/v1/{{data[0][4]}}/2/u',
-                        type: 'POST',
-                        data: {
-                            'usmcngzyznoy': '🤔'
-                        }
-                    });
-                } else {
-                    $(this).removeClass(not_filled);
-                    $(this).addClass(fill);
-                    change_num_of_likes("add");
-                    $.ajax({
-                        url: '/api/v1/{{data[0][4]}}/2/l',
-                        type: 'POST',
-                        data: {
-                            'usmcngzyznoy': '🤔'
-                        }
-                    });
-                }
+        $(document).ready(function(){
+            $(".imgcontain").mouseover(function() {
+                $(this).children(".hoverdiv").show();
             });
-            $('#reply-0').on('click', function(e) {
-                e.preventDefault();
-                var content = $('textarea[name="content"]').val();
-                if (content.length > 0) {
-                    $.ajax({
-                        url: '/api/v1/{{data[0][4]}}/3/c',
-                        type: 'POST',
-                        data: {
-                            'content': content
-                        },
-                        success: function(data) {
-                            if (data == "OK") {
-                                $('textarea[name="content"]').val("");
-                                $('#comms-0').click();
-                                var comment = `
-                                <article class="media">
-                                    <figure class="media-left">
-                                        <p class="image is-64x64">
-                                            <img src="{{session.ppic}}" class="is-sway" alt="{{session.uname}}">
-                                        </p>
-                                    </figure>
-                                    <div class="media-content">
-                                        <div class="content">
-                                            <p>
-                                                <a href="#">{{session.uname}}
-                                                {% if session.verified %}
-                                                    <span class="bi bi-patch-check is-verified"></span>
-                                                {% endif %}
-                                                {% if session.mod %}
-                                                    <span class="modtext">[mod]</span>
-                                                {% endif %}</a>
-                                                <span> · Just Now</span>
-                                                <br>
-                                                ` + content + `
-                                                <br>
-                                                <small>
-                                                    <a>Reply</a> · 
-                                                    <a aria-label="replies">See replies&nbsp;<span class="bi bi-chevron-down"></span></a>
-                                                </small>
-                                            </p>
-                                        </div>
-                                    </div>
-                                </article>
-                                `;
-                                
-                                $('#comment-box').prepend(comment);
-                                var num_of_comms = parseInt($('#comms-num').text());
-                                $('#comms-num').html("<span class=\"bi bi-chat\"></span>&nbsp;" + (num_of_comms + 1) + " Comment(s)");
-                                $('#comms-0').html("&nbsp;" + (num_of_comms + 1));
-                            } else {
-                                alert("Couldn't post comment. Please try again later.");
-                            }
-                        }
-                    });
-                }
-            });
-            $('#load-more').on('click', function(e) {
-                e.preventDefault();
-                $(this).addClass('is-loading');
-                $.ajax({
-                    url: '/api/v1/{{data[0][4]}}/4/c-c',
-                    type: 'POST',
-                    data: {
-                        'last_id': comment_count
-                    },
-                    success: function(data) {
-                        if (data != "Error") {
-                            if (data.length > 0) {
-                                for (var i = 0; i < data.length; i++) {
-                                    var comment = `
-                                    <article id="` + data[i][4] + `" class="media">
-                                        <figure class="media-left">
-                                            <p class="image is-64x64">
-                                                <img src="` + data[i][3] + `" class="is-sway" alt="` + data[i][0] + `">
-                                            </p>
-                                        </figure>
-                                        <div class="media-content">
-                                            <div class="content">
-                                                <p>
-                                                    <a href="#">` + data[i][0] + `
-                                                    ` + (data[i][1] == "True" ? `<span class="bi bi-patch-check is-verified"></span>` : "") + `
-                                                    ` + (data[i][2] == "True" ? `<span class="modtext">[mod]</span>` : "") + `</a>
-                                                    <span> · ` + data[i][6] + `</span>
-                                                    <br>
-                                                    ` + data[i][5] + `
-                                                    <br>
-                                                    <small>
-                                                        <a>Reply</a> · 
-                                                        <a aria-label="replies">See replies&nbsp;<span class="bi bi-chevron-down"></span></a>
-                                                    </small>
-                                                </p>
-                                            </div>
-                                        </div>
-                                    </article>
-                                    `;
-                                    $('#comment-box').append(comment);
-                                }
-                            } else {
-                                $('#load-more').html("No more comments");
-                                $('#load-more').attr('disabled', true);
-                            }
-                        }
-                        comment_count += data.length;
-                    }
-                });
-                $(this).removeClass('is-loading');
-            });
-            
-            // smooth scroll to anchor
-            $('#comms-0').on('click', function(e) {
-                e.preventDefault();
-                $('html, body').animate({
-                    scrollTop: $('#comms-1').offset().top
-                }, 800);
+            $(".imgcontain").mouseout(function() {
+                $(this).children(".hoverdiv").hide();
             });
         });
     </script>

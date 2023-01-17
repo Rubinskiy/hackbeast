@@ -23,7 +23,7 @@
                             <p class="par title is-4">{{data[0][5]}}</p>
                             <span>
                                 <small>
-                                    By <a href="#">@{{data[0][0]}}
+                                    By <a href="/profile/{{data[0][0]}}">@{{data[0][0]}}
                                     {% if data[0][1] == 1 %}
                                         <span class="bi bi-patch-check is-verified"></span>
                                     {% endif %}
@@ -98,7 +98,7 @@
                                 <div class="media-content">
                                     <div class="content">
                                         <p>
-                                            <a href="#">{{comment[0]}}
+                                            <a href="/profile/{{comment[0]}}">{{comment[0]}}
                                             {% if comment[1] == 1 %}
                                                 <span class="bi bi-patch-check is-verified"></span>
                                             {% endif %}
@@ -231,7 +231,7 @@
     </div>
 
     <script>
-        let comment_count = "{{count.value}}";
+        let comment_count = {{count.value}};
         function change_num_of_likes(add_or_remove) {
             var likes = parseInt($('#like-0').text());
             if (add_or_remove == "add") {
@@ -286,7 +286,7 @@
                                     <div class="media-content">
                                         <div class="content">
                                             <p>
-                                                <a href="#">{{session.uname}}
+                                                <a href="/profile/{{session.uname}}}">{{session.uname}}
                                                 {% if session.verified %}
                                                     <span class="bi bi-patch-check is-verified"></span>
                                                 {% endif %}
@@ -341,7 +341,7 @@
                                         <div class="media-content">
                                             <div class="content">
                                                 <p>
-                                                    <a href="#">` + data[i][0] + `
+                                                    <a href="/profile/` + data[i][0] + `">` + data[i][0] + `
                                                     ` + (data[i][1] == "True" ? `<span class="bi bi-patch-check is-verified"></span>` : "") + `
                                                     ` + (data[i][2] == "True" ? `<span class="modtext">[mod]</span>` : "") + `</a>
                                                     <span> · ` + data[i][6] + `</span>

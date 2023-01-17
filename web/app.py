@@ -20,6 +20,9 @@ app.config['MYSQL_HOST'] = 'localhost'
 app.config['MYSQL_USER'] = 'root'
 app.config['MYSQL_PASSWORD'] = ''
 app.config['MYSQL_DB'] = 'superbarreldb'
+app.config['MYSQL_CHARSET'] = 'utf8mb4'
+app.config['MYSQL_COLLATION'] = 'utf8mb4_unicode_ci'
+
 mysql = MySQL(app)
 
 app.jinja_env.filters['nl2br'] = nl2br
@@ -39,6 +42,13 @@ def not_found(e):
    title = "404"
    return render_template('404.html', title=title, error=e)
 
+@app.errorhandler(500)
+def not_found(e):
+   title = "Server error"
+   return render_template('error.html', title=title, error=e)
+
+# 403 here
+
 @app.route('/')
 def home():
    msg = ""
@@ -53,8 +63,8 @@ def forum():
    cursor.execute('''SELECT profiles.username, profiles.is_verified, profiles.is_mod, profiles.ppic, posts.id, title, timestamp FROM profiles, posts WHERE profiles.id = user_id AND type=1 ORDER BY timestamp DESC LIMIT 6''')
    mysql.connection.commit()
    data = cursor.fetchall()
-   return render_template('forum.html', data=data, get_post_time=get_post_time, limit_char=limit_char)
    cursor.close()
+   return render_template('forum.html', data=data, get_post_time=get_post_time, limit_char=limit_char)
 
 @app.route('/forum/create')
 def create():
@@ -84,8 +94,8 @@ def latest():
    cursor.execute('''SELECT profiles.username, profiles.is_verified, profiles.is_mod, profiles.ppic, posts.id, title, descr, timestamp FROM profiles, posts WHERE profiles.id=user_id AND type=1 ORDER BY timestamp DESC LIMIT 10''')
    mysql.connection.commit()
    data = cursor.fetchall()
-   return render_template('latest.html', data=data, get_post_time=get_post_time, limit_char=limit_char)
    cursor.close()
+   return render_template('latest.html', data=data, get_post_time=get_post_time, limit_char=limit_char)
 
 @app.route('/forum/<id>/<page>')
 def forum_page(id=None, page=None):
@@ -115,9 +125,8 @@ def forum_page(id=None, page=None):
       ([int(id)]))
       
       comments = cursor.fetchall()
-      return render_template('post.html', data=data, comments=comments, get_post_time=get_post_time)
       cursor.close()
-   return page
+      return render_template('post.html', data=data, comments=comments, get_post_time=get_post_time)
 
 @app.route('/profile/<username>')
 def profile(username=None):
@@ -125,20 +134,17 @@ def profile(username=None):
       return redirect('/404')
    else:
       cursor = mysql.connection.cursor()
-      cursor.execute('''SELECT id, username, ppic, is_verified, is_mod FROM profiles WHERE username=%s''', ([username]))
+      cursor.execute('''SELECT id, username, ppic, is_verified, is_mod, reg_date FROM profiles WHERE username=%s;''', ([username]))
       mysql.connection.commit()
-      data = cursor.fetchall()
+      data = cursor.fetchone()
       if data == None:
          return redirect('/404')
-      cursor.execute('''SELECT COUNT(*) FROM posts WHERE posts.user_id=%s AND posts.type=1''', ([data[0][0]]))
-      mysql.connection.commit()
-      posts = cursor.fetchall()
-      cursor.execute('''SELECT COUNT(*) FROM posts WHERE posts.user_id=%s AND posts.type=2''', ([data[0][0]]))
-      mysql.connection.commit()
-      comments = cursor.fetchall()
-      return render_template('profile.html', data=data, posts=posts, comments=comments)
-      cursor.close()
-   return username
+      else:
+         cursor.execute('''SELECT COUNT(*) FROM posts WHERE posts.user_id=%s AND posts.type=1''', ([data[0]]))
+         mysql.connection.commit()
+         stats = cursor.fetchall()
+         cursor.close()
+         return render_template('profile.html', data=data, stats=stats, get_post_time=get_post_time)
 
 #-----------------AUTH-----------------#
 @app.route('/login')
@@ -179,7 +185,7 @@ def authlog():
          return redirect('/')
       else:
          return render_template('login.html', msg="Invalid Email/Username or Password.")
-      cursor.close()
+   cursor.close()
    return render_template("login.html")
 
 @app.route('/authreg', methods = ['POST'])
