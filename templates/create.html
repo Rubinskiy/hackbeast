@@ -2,6 +2,7 @@
 
 {% block head %}
     <title>Post</title>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/bulma-tagsinput@2.0.0/dist/js/bulma-tagsinput.min.js"></script>
 {% endblock %}
 
 {% block body %}
@@ -23,32 +24,77 @@
                 {% endif %}
                 <form action="/post-content" class="has-text-white" method = "POST">
                     <div class="field">
-                        <label class="label has-text-white">Category</label>
+                        <label class="has-text-white">
+                            Category<br />
+                            <span style="font-size: 12px;">Choose the most appropriate section of the site to post to</span>
+                        </label>
                         <div class="control">
                             <div class="select">
                             <select>
                                 <option>General</option>
-                                <option>With options</option>
-                                <option>With options</option>
-                                <option>With options</option>
-                                <option>With options</option>
-                                <option>With options</option>
+                                <option>Coding</option>
+                                <option>Tools and resources</option>
+                                <option>Bugs and Improvements</option>
+                                <option>Other</option>
                             </select>
                             </div>
                         </div>
                     </div>
                     <div class="field">
-                        <label class="label has-text-white">Title</label>
+                        <label class="has-text-white">
+                            Title<br />
+                            <span style="font-size: 12px;">Add a title to your post. You're allowed to use emojis and fancy text (Up to 120 characters)</span>
+                        </label>
                         <div class="control">
                             <input class="input is-rounded" type="text" name="title" placeholder="The title of your post" minlength="6" maxlength="120" required>
                         </div>
                     </div>
                     <div class="field">
-                        <label class="label has-text-white">Content</label>
+                        <label class="has-text-white">
+                            Content<br />
+                            <span style="font-size: 12px;">This will be the main content of your post (Up to 30000 characters)</span>
+                        </label>
                         <div class="control">
-                            <textarea class="textarea btn-round2" name="content" placeholder="Write your content here" rows="12" minlength="24" maxlength="30000" required></textarea>
+                            <div class="field has-addons">
+                                <p class="control">
+                                    <a class="button" id="bold-tag">
+                                        <span class="icon is-small">
+                                            <i class="bi bi-type-bold"></i>
+                                        </span>
+                                        <span>Bold</span>
+                                    </a>
+                                </p>
+                                <p class="control">
+                                    <a class="button" id="italic-tag">
+                                        <span class="icon is-small">
+                                            <i class="bi bi-type-italic"></i>
+                                        </span>
+                                        <span>Italic</span>
+                                    </a>
+                                </p>
+                                <p class="control">
+                                    <a class="button" id="code-tag">
+                                        <span class="icon is-small">
+                                            <i class="bi bi-braces"></i>
+                                        </span>
+                                        <span>Add code section</span>
+                                    </a>
+                                </p>
+                            </div>
+                            <textarea id="txt" class="textarea btn-round2" name="content" placeholder="Write your content here" rows="12" minlength="24" maxlength="30000" required></textarea>
                         </div>
                     </div>
+
+                    <div class="field">
+                        <label class="has-text-white">
+                            Tags<br />
+                            <span style="font-size: 12px;">Seperate tags using commas. You can add up to 5 tags.</span>
+                        </label>
+                        <div class="control">
+                            <input class="input is-rounded" type="text" name="tags" placeholder="Add tags to your post" minlength="2" maxlength="120" required>
+                        </div>
+                    </div>
+
                     <div style="padding: 6px;"></div>
                     <button class="button is-pulled-right is-link btn-round" type="submit">Post</button>
                 </form>
@@ -56,4 +102,23 @@
             <div class="column"></div>
         </div>
     </div>
+    <script>
+        const codeBtn = document.getElementById("code-tag");
+        const textarea = document.getElementById("txt");
+        codeBtn.addEventListener("click", function() {
+            addCodeTag(textarea);
+        });
+
+        function addCodeTag(textarea) {
+            const caretPos = textarea.selectionStart;
+            const currentValue = textarea.value;
+            const after = currentValue.substring(caretPos);
+            textarea.value = currentValue.substring(0, caretPos) + "[code]\r\n\r\n[/code]" + after;
+            textarea.focus();
+            // set caret between [code] and [/code]
+            textarea.selectionStart = caretPos + 7;
+            textarea.selectionEnd = caretPos + 7;
+
+        }
+    </script>
 {% endblock %}

@@ -1,16 +1,24 @@
 from flask import Flask, render_template, request, session, redirect, jsonify
+from werkzeug.utils import secure_filename
 from flask_mysqldb import MySQL
 from flask_session import Session
 from better_profanity import profanity
 from uuid import uuid4
 import helpers.dbfunc as dbf
+from helpers.filters import nl2br
+from PIL import Image
 import random
 import hashlib
 import datetime
 import time
+import os
+
+UPLOAD_FOLDER = os.getcwd() + '/pfps'
+UPLOAD_FOLDER = UPLOAD_FOLDER.replace(os.sep, '/')
+ALLOWED_EXTENSIONS = set(['png', 'jpg', 'jpeg', 'gif'])
 
 app = Flask(__name__)
-app.secret_key = "myBbyIsASuperCutePumpkinPie"
+app.secret_key = "sevenSeasBroughtTogetherForIceCream"
 app.config['SESSION_PERMANENT'] = False
 app.config['SESSION_TYPE'] = 'filesystem'
 Session(app)
@@ -19,7 +27,14 @@ app.config['MYSQL_HOST'] = 'localhost'
 app.config['MYSQL_USER'] = 'root'
 app.config['MYSQL_PASSWORD'] = ''
 app.config['MYSQL_DB'] = 'superbarreldb'
+app.config['MYSQL_CHARSET'] = 'utf8mb4'
+app.config['MYSQL_COLLATION'] = 'utf8mb4_unicode_ci'
+
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+
 mysql = MySQL(app)
+
+app.jinja_env.filters['nl2br'] = nl2br
 
 # https://github.com/snguyenthanh/better_profanity/blob/master/better_profanity/profanity_wordlist.txt
 custom_curse_words = [
@@ -34,7 +49,14 @@ profanity.load_censor_words(custom_curse_words)
 @app.errorhandler(404)
 def not_found(e):
    title = "404"
-   return render_template('404.html', title=title, error=e)
+   return render_template('404.html', title=title, error="We couldn't find that page.")
+
+@app.errorhandler(500)
+def not_found(e):
+   title = "Server error"
+   return render_template('error.html', title=title, error=e)
+
+# 403 here
 
 @app.route('/')
 def home():
@@ -47,11 +69,11 @@ def home():
 @app.route('/forum')
 def forum():
    cursor = mysql.connection.cursor()
-   cursor.execute('''SELECT profiles.username, profiles.is_verified, profiles.is_mod, profiles.ppic, posts.id, title, timestamp FROM profiles, posts WHERE profiles.id = user_id AND type=1 ORDER BY timestamp DESC LIMIT 6''')
+   cursor.execute('''SELECT profiles.username, profiles.is_verified, profiles.is_mod, profiles.ppic, posts.id, title, timestamp FROM profiles, posts WHERE profiles.id = user_id AND type=1 ORDER BY timestamp DESC LIMIT 10''')
    mysql.connection.commit()
    data = cursor.fetchall()
-   return render_template('forum.html', data=data, get_post_time=get_post_time, limit_char=limit_char)
    cursor.close()
+   return render_template('forum.html', data=data, get_post_time=get_post_time, limit_char=limit_char)
 
 @app.route('/forum/create')
 def create():
@@ -81,15 +103,14 @@ def latest():
    cursor.execute('''SELECT profiles.username, profiles.is_verified, profiles.is_mod, profiles.ppic, posts.id, title, descr, timestamp FROM profiles, posts WHERE profiles.id=user_id AND type=1 ORDER BY timestamp DESC LIMIT 10''')
    mysql.connection.commit()
    data = cursor.fetchall()
-   return render_template('latest.html', data=data, get_post_time=get_post_time, limit_char=limit_char)
    cursor.close()
+   return render_template('latest.html', data=data, get_post_time=get_post_time, limit_char=limit_char)
 
 @app.route('/forum/<id>/<page>')
 def forum_page(id=None, page=None):
    if page == None or id == None:
       return redirect('/404')
    else:
-      # if session['id'] does not exist
       if not session.get("id"):
          session_id = 0
       else:
@@ -100,31 +121,53 @@ def forum_page(id=None, page=None):
       '''
          SELECT profiles.username, profiles.is_verified, profiles.is_mod, profiles.ppic, posts.id, title, descr, timestamp FROM profiles, posts WHERE profiles.id=posts.user_id AND posts.id=%s AND REPLACE(posts.title, ' ', '-')=%s
          UNION ALL SELECT COUNT(*), NULL, NULL, NULL, NULL, NULL, NULL, NULL FROM posts WHERE posts.type=2 AND posts.post_id=%s
-         UNION ALL SELECT COUNT(*), NULL, NULL, NULL, NULL, NULL, NULL, NULL FROM posts WHERE posts.type=2 AND posts.post_id=%s AND posts.user_id=%s;
+         UNION ALL SELECT COUNT(*), NULL, NULL, NULL, NULL, NULL, NULL, NULL FROM posts WHERE posts.type=2 AND posts.post_id=%s AND posts.user_id=%s
+         UNION ALL SELECT COUNT(*), NULL, NULL, NULL, NULL, NULL, NULL, NULL FROM posts WHERE posts.type=3 AND posts.post_id=%s;
       ''', 
-      ([int(id), str(page), int(id), int(id), session_id]))
+      ([int(id), str(page), int(id), int(id), session_id, int(id)]))
       mysql.connection.commit()
       data = cursor.fetchall()
       if data == None:
          return redirect('/404')
       cursor.execute('''SELECT profiles.username, profiles.is_verified, profiles.is_mod, profiles.ppic, posts.id, posts.descr, posts.timestamp FROM profiles, posts WHERE profiles.id=posts.user_id AND posts.type=3 AND posts.post_id=%s ORDER BY posts.timestamp DESC LIMIT 6;''',
       ([int(id)]))
+      
       comments = cursor.fetchall()
-      return render_template('post.html', data=data, comments=comments, commentsNum=cursor.rowcount, get_post_time=get_post_time)
       cursor.close()
-   return page
+      return render_template('post.html', data=data, comments=comments, get_post_time=get_post_time)
+
+@app.route('/profile/<username>')
+def profile(username=None):
+   if username == None:
+      return redirect('/404')
+   else:
+      cursor = mysql.connection.cursor()
+      cursor.execute('''SELECT id, username, ppic, is_verified, is_mod, bio, reg_date FROM profiles WHERE username=%s;''', ([username]))
+      mysql.connection.commit()
+      data = cursor.fetchone()
+      if data == None:
+         return redirect('/404')
+      else:
+         cursor.execute('''SELECT COUNT(*) FROM posts WHERE posts.user_id=%s AND posts.type=1''', ([data[0]]))
+         mysql.connection.commit()
+         stats = cursor.fetchall()
+         cursor.close()
+         return render_template('profile.html', data=data, stats=stats, get_post_time=get_post_time)
 
 #-----------------AUTH-----------------#
 @app.route('/login')
 def login():
    if not session.get("token"):
-      return render_template('login.html')
+      referrer = request.referrer
+      return render_template('login.html', ref=referrer)
    return redirect("/")
+
 @app.route('/register')
 def register():
    if not session.get("token"):
       return render_template('register.html')
    return redirect("/")
+
 @app.route('/logout')
 def logout():
    session.clear()
@@ -150,10 +193,16 @@ def authlog():
          session['verified'] = success[3]
          session['mod'] = success[4]
          session['ppic'] = success[5]
-         return redirect('/')
+         referrer = request.args.get('ref')
+         if referrer == None:
+            return redirect('/')
+         elif "hackbeast.org" not in referrer:
+            return redirect('/')
+         else:
+            return redirect(referrer)
       else:
          return render_template('login.html', msg="Invalid Email/Username or Password.")
-      cursor.close()
+   cursor.close()
    return render_template("login.html")
 
 @app.route('/authreg', methods = ['POST'])
@@ -182,13 +231,18 @@ def authreg():
             return render_template("login.html", msg="Account created! Please login to continue.", type="success")
 
 # -----------------API-----------------#
+def allowed_file(filename):
+    return '.' in filename and \
+           filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+           
 @app.route('/api/v1/<post_id>/<post_type>/<action>', methods=['POST'])
 def api_forum(post_id=None, post_type=None, action=None):
    response = ""
+   # user must be logged in
+   if not session.get("token") and action != "c-c":
+      return "You must be logged in to perform this action."
    if post_id==None or post_type==None or action==None:
       return "Invalid request", 400
-   if not session['token'] and not session['id']:
-      return redirect('/login')
    # Like functionality
    cursor = mysql.connection.cursor()
    if action == "l":
@@ -206,11 +260,34 @@ def api_forum(post_id=None, post_type=None, action=None):
       cursor.execute('''SELECT profiles.username, profiles.is_verified, profiles.is_mod, profiles.ppic, posts.id, posts.descr, posts.timestamp FROM profiles, posts WHERE profiles.id=posts.user_id AND posts.type=3 AND posts.post_id=%s ORDER BY posts.timestamp DESC LIMIT 6 OFFSET %s;''',
       ([post_id, int(request.form['last_id'])]))
       response = cursor.fetchall()
-      # Format the time
       response = [list(i) for i in response]
       for i in response:
          i[6] = get_post_time(i[6])
       response = [tuple(i) for i in response]
+   # Delete post
+   elif action == "d":
+      cursor.execute('''DELETE FROM posts WHERE posts.id=%s AND posts.user_id=%s AND posts.type=%s;''', 
+      (post_id, session['id'], post_type))
+   # Profile picture
+   elif action == "p":
+      if 'file' not in request.files:
+         return "No file part", 400
+      file = request.files['file']
+      if file.filename == '':
+         return "No selected file", 400
+      if file and allowed_file(file.filename):
+         filename = secure_filename(file.filename)
+         file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+         cursor.execute('''UPDATE profiles SET ppic=%s WHERE id=%s;''', 
+         ([app.config['UPLOAD_FOLDER'] + "/" + filename, post_id]))
+         session['ppic'] = app.config['UPLOAD_FOLDER'] + "/" + filename
+
+         # strip metadata
+         img = Image.open(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+         data = list(img.getdata())
+         img_without_exif = Image.new(img.mode, img.size)
+         img_without_exif.putdata(data)
+         img_without_exif.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
    cursor.close()
 
    try:
@@ -223,9 +300,6 @@ def api_forum(post_id=None, post_type=None, action=None):
          return jsonify(response)
       else:
          return "OK", 200
-         
-      # LOAD MORE ERROR
-      # AND IF NOT LOGIN THEN DONT MAKE THE LOAD MORE EXISST OR SOMETHN
 
 # -----------------FUNCTIONS-----------------#
 def limit_char(text, limit=50, ext="..."):

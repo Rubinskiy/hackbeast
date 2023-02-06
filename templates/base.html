@@ -40,12 +40,12 @@
                     <!-- navbar items | right side -->
                     <div class="navbar-end">
                         {% if session.token %}
-                            <a class="navbar-item" href="/forum/create"><span class="bi bi-plus-circle"></span></a>
+                            <a class="navbar-item" href="/forum/create"><span class="bi bi-sticky"></span></a>
                             <a class="navbar-item" href="#"><span class="bi bi-bell"></span></a>
                             <div class="navbar-item has-dropdown is-hoverable">
                                 <a class="navbar-link has-text-white"><span class="bi bi-person-circle"></span>&nbsp;&nbsp;&nbsp;{{ session.uname }}</a>
                                 <div class="navbar-dropdown is-right">
-                                    <a class="navbar-item">Account</a>
+                                    <a href="/profile/{{session.uname}}" class="navbar-item">Profile</a>
                                     <a class="navbar-item">Settings</a>
                                     <hr class="navbar-divider">
                                     <a class="navbar-item" href="/logout">Log out</a>
@@ -59,9 +59,9 @@
                 </div>
             </div>
         </nav>
-        <div style="padding-top: 25px;"></div>
+        <div style="padding-top: 8vh;"></div>
         {% block body %}{% endblock %}
-        <div style="padding-top: 30px;"></div>
+        <div style="padding-top: 10vh;"></div>
         <footer class="footer is-dark">
             <div class="columns">
                 <div class="column is-4">
@@ -69,7 +69,6 @@
                         <h4 class="title has-text-white is-4">HackBeast</h4>
                         <p style="font-size: 11px;" class="subtitle has-text-white">Previously named HackersHaven</p>
                         <p id="copyright" class="subtitle has-text-white is-6"></p>
-                        <small>CHANGE THIS: Site design / logo © 2022 Stack Exchange Inc; user contributions licensed under CC BY-SA. rev 2022.12.5.43077</small>
                     </div>
                 </div>
                 <div class="column is-3">
@@ -110,7 +109,7 @@
     </div>
     <script>
         var year = new Date().getFullYear();
-        document.getElementById("copyright").innerHTML = "Copyright &copy; " + year + " HackBeast";
+        document.getElementById("copyright").innerHTML = "Copyright &copy; 2021 - " + year + " HackBeast.org.<br /><span style=\"font-size:10px;\">All rights reserved. HackBeast is fully owned by <a href=\"#\">HivyMedia</a>.<br />rev number 2023.1.20.50432</span>";
     </script>
 </body>
 </html>

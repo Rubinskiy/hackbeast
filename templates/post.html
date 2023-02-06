@@ -2,6 +2,7 @@
 
 {% block head %}
     <title>Post</title>
+    <script src="https://unpkg.com/bulma-toast"></script>
     <script src="https://cdn.jsdelivr.net/gh/google/code-prettify@master/loader/run_prettify.js"></script>
 {% endblock %}
 
@@ -23,23 +24,25 @@
                             <p class="par title is-4">{{data[0][5]}}</p>
                             <span>
                                 <small>
-                                    By <a href="#">@{{data[0][0]}}
+                                    By <a href="/profile/{{data[0][0]}}">@{{data[0][0]}}
                                     {% if data[0][1] == 1 %}
                                         <span class="bi bi-patch-check is-verified"></span>
                                     {% endif %}
                                     {% if data[0][2] == 1 %}
                                         <span class="modtext">[mod]</span>
                                     {% endif %}</a>
-                                <span id="time"> - {{get_post_time(data[0][7])}}</span></small>
+                                    <span id="time"> - {{get_post_time(data[0][7])}}</span>
+                                    in <a href="#">Tools and resources</a>
+                                </small>
                             </span>
                         </div>
                             <nav class="level is-mobile">
                                 <div class="level-left">
                                     <a class="level-item" aria-label="share">
-                                        <span class="bi bi-share"></span>
+                                        <span onclick="get_url()" class="bi bi-share"></span>
                                     </a>
                                     <a class="level-item" aria-label="comment">
-                                        <span id="comms-0" class="bi bi-chat">&nbsp;{{commentsNum}}</span>
+                                        <span id="comms-0" class="bi bi-chat">&nbsp;{{data[3][0]}}</span>
                                     </a>
                                     <a class="level-item" aria-label="like">
                                         {% if session['id'] %}
@@ -53,6 +56,18 @@
                                         {% endif %}
                                     </a>
                                 </div>
+                                <div class="level-right">
+                                    {% if session['id'] %}
+                                        {% if session['uname'] == data[0][0] %}
+                                            <a id="open-delete-modal" class="level-item" aria-label="delete" data-target="delete-modal">
+                                                <span class="bi bi-trash" style="color:red;"></span>
+                                            </a>
+                                            <a class="level-item" aria-label="settings">
+                                                <span class="bi bi-pencil-square"></span>
+                                            </a>
+                                        {% endif %}
+                                    {% endif %}
+                                </div>
                             </nav>
                             <p>
                                 {% for code in data[0][6].split('[code]') %}
@@ -60,7 +75,7 @@
                                         <pre class="prettyprint prefield">{{code.split('[/code]')[0]}}</pre>
                                         {{code.split('[/code]')[1]}}
                                     {% else %}
-                                        {{code}}
+                                        {{code|nl2br}}
                                     {% endif %}
                                 {% endfor %}
                             </p>
@@ -70,7 +85,7 @@
                 </div>
 
                 <div id="comms-1" class="box round">
-                    <p id="comms-num" class="par title is-4"><span class="bi bi-chat"></span>&nbsp;{{commentsNum}} Comments</p>
+                    <p id="comms-num" class="par title is-4"><span class="bi bi-chat"></span>&nbsp;{{data[3][0]}} Comment(s)</p>
                     <div style="padding-top: 15px;"></div>
                     <div id="comment-box">
                         
@@ -85,15 +100,13 @@
                                 <div class="media-content">
                                     <div class="content">
                                         <p>
-                                            <strong>
-                                                <a href="#">{{comment[0]}}
-                                                {% if comment[1] == 1 %}
-                                                    <span class="bi bi-patch-check is-verified"></span>
-                                                {% endif %}
-                                                {% if comment[2] == 1 %}
-                                                    <span class="modtext">[mod]</span>
-                                                {% endif %}</a>
-                                            </strong>
+                                            <a href="/profile/{{comment[0]}}">{{comment[0]}}
+                                            {% if comment[1] == 1 %}
+                                                <span class="bi bi-patch-check is-verified"></span>
+                                            {% endif %}
+                                            {% if comment[2] == 1 %}
+                                                <span class="modtext">[mod]</span>
+                                            {% endif %}</a>
                                             <span> · {{get_post_time(comment[6])}}</span>
                                             <br>
                                             {{comment[5]}}
@@ -164,10 +177,12 @@
                             </div>
                         </article>-->
                     </div>
-                    <div style="padding-top:25px;"></div>
-                    <div class="has-text-centered">
-                        <p id="load-more"><a>Load more</a></p>
-                    </div>
+                    {% if data[3][0]|int > 6 %}
+                        <div style="padding-top: 15px;"></div>
+                        <div class="has-text-centered">
+                            <button id="load-more" class="button is-light is-rounded">Load more comments</button>
+                        </div>
+                    {% endif %}
                     <div style="padding-top: 25px;"></div>
                     {% if session.token %}
                         <article class="media">
@@ -179,7 +194,7 @@
                             <div class="media-content">
                             <div class="field">
                                 <p class="control">
-                                    <textarea class="textarea btn-round2" name="content" placeholder="Reply as @{{session.uname}}" rows="4" minlength="1" maxlength="600" required></textarea>
+                                    <textarea class="textarea btn-round2" name="content" placeholder="Comment as @{{session.uname}}" rows="4" minlength="1" maxlength="600" required></textarea>
                                 </p>
                             </div>
                             </div>
@@ -201,14 +216,54 @@
             <div class="column"></div>
         </div>
     </div>
+
+    <div id="delete-modal" class="modal">
+        <div class="modal-background"></div>
+        <div class="modal-content">
+            <div class="box round">
+            <p><strong>Are you sure you want to delete this post?</strong></p>
+            <small>This action cannot be undone.</small>
+            <div style="padding-top: 25px;"></div>
+            <div class="buttons is-right">
+                <a id="delete-post" class="button is-danger one btn-round is-fixed-top">Yes, delete it</a>
+                <a id="close-delete-modal" class="button is-info one btn-round is-fixed-top">No, keep it</a>
+            </div>
+            </div>
+        </div>
+    </div>
+
     <script>
-        let comment_count = "{{count.value}}";
+        let comment_count = {{count.value}};
         function change_num_of_likes(add_or_remove) {
             var likes = parseInt($('#like-0').text());
             if (add_or_remove == "add") {
                 $('#like-0').html("&nbsp;" + (likes + 1));
             } else {
                 $('#like-0').html("&nbsp;" + (likes - 1));
+            }
+        }
+        var dummy = document.createElement('input'),
+        text = window.location.href;
+        function get_url() {
+            try {
+                document.body.appendChild(dummy);
+                dummy.value = text;
+                dummy.select();
+                document.execCommand('copy');
+                document.body.removeChild(dummy);
+                bulmaToast.toast({
+                    message: 'Link copied to clipboard',
+                    type: 'is-info',
+                    position: 'bottom-left',
+                    duration: 3000,
+                });
+            } catch (err) {
+                bulmaToast.toast({
+                    message: 'Could not copy link to clipboard',
+                    type: 'is-danger',
+                    position: 'bottom-left',
+                    duration: 3000,
+                });
             }
         }
         $(document).ready(function() {
@@ -222,9 +277,6 @@
                     $.ajax({
                         url: '/api/v1/{{data[0][4]}}/2/u',
                         type: 'POST',
-                        data: {
-                            'usmcngzyznoy': '🤔'
-                        }
                     });
                 } else {
                     $(this).removeClass(not_filled);
@@ -233,9 +285,6 @@
                     $.ajax({
                         url: '/api/v1/{{data[0][4]}}/2/l',
                         type: 'POST',
-                        data: {
-                            'usmcngzyznoy': '🤔'
-                        }
                     });
                 }
             });
@@ -253,7 +302,6 @@
                             if (data == "OK") {
                                 $('textarea[name="content"]').val("");
                                 $('#comms-0').click();
-                                // add comment to page
                                 var comment = `
                                 <article class="media">
                                     <figure class="media-left">
@@ -264,15 +312,13 @@
                                     <div class="media-content">
                                         <div class="content">
                                             <p>
-                                                <strong>
-                                                    <a href="#">{{session.uname}}
-                                                    {% if session.verified %}
-                                                        <span class="bi bi-patch-check is-verified"></span>
-                                                    {% endif %}
-                                                    {% if session.mod %}
-                                                        <span class="modtext">[mod]</span>
-                                                    {% endif %}</a>
-                                                </strong>
+                                                <a href="/profile/{{session.uname}}}">{{session.uname}}
+                                                {% if session.verified %}
+                                                    <span class="bi bi-patch-check is-verified"></span>
+                                                {% endif %}
+                                                {% if session.mod %}
+                                                    <span class="modtext">[mod]</span>
+                                                {% endif %}</a>
                                                 <span> · Just Now</span>
                                                 <br>
                                                 ` + content + `
@@ -289,7 +335,7 @@
                                 
                                 $('#comment-box').prepend(comment);
                                 var num_of_comms = parseInt($('#comms-num').text());
-                                $('#comms-num').html("<span class=\"bi bi-chat\"></span>&nbsp;" + (num_of_comms + 1) + " Comments");
+                                $('#comms-num').html("<span class=\"bi bi-chat\"></span>&nbsp;" + (num_of_comms + 1) + " Comment(s)");
                                 $('#comms-0').html("&nbsp;" + (num_of_comms + 1));
                             } else {
                                 alert("Couldn't post comment. Please try again later.");
@@ -300,6 +346,7 @@
             });
             $('#load-more').on('click', function(e) {
                 e.preventDefault();
+                $(this).addClass('is-loading');
                 $.ajax({
                     url: '/api/v1/{{data[0][4]}}/4/c-c',
                     type: 'POST',
@@ -320,11 +367,9 @@
                                         <div class="media-content">
                                             <div class="content">
                                                 <p>
-                                                    <strong>
-                                                        <a href="#">` + data[i][0] + `
-                                                        ` + (data[i][1] == "True" ? `<span class="bi bi-patch-check is-verified"></span>` : "") + `
-                                                        ` + (data[i][2] == "True" ? `<span class="modtext">[mod]</span>` : "") + `</a>
-                                                    </strong>
+                                                    <a href="/profile/` + data[i][0] + `">` + data[i][0] + `
+                                                    ` + (data[i][1] == "True" ? `<span class="bi bi-patch-check is-verified"></span>` : "") + `
+                                                    ` + (data[i][2] == "True" ? `<span class="modtext">[mod]</span>` : "") + `</a>
                                                     <span> · ` + data[i][6] + `</span>
                                                     <br>
                                                     ` + data[i][5] + `
@@ -342,11 +387,13 @@
                                 }
                             } else {
                                 $('#load-more').html("No more comments");
+                                $('#load-more').attr('disabled', true);
                             }
                         }
                         comment_count += data.length;
                     }
                 });
+                $(this).removeClass('is-loading');
             });
             
             // smooth scroll to anchor
@@ -355,6 +402,37 @@
                 $('html, body').animate({
                     scrollTop: $('#comms-1').offset().top
                 }, 800);
+            });
+
+            // open modal
+            $('#open-delete-modal').on('click', function(e) {
+                e.preventDefault();
+                $('#delete-modal').addClass('is-active');
+            });
+
+            // close modal
+            $('#close-delete-modal').on('click', function(e) {
+                e.preventDefault();
+                $('#delete-modal').removeClass('is-active');
+            });
+
+            // delete post
+            $('#delete-post').on('click', function(e) {
+                e.preventDefault();
+                $.ajax({
+                    url: '/api/v1/{{data[0][4]}}/1/d',
+                    type: 'POST',
+                    data: {
+                        'bG9va2luZyB0byB3b3JrIHdpdGggdXM/': '🤔'
+                    },
+                    success: function(data) {
+                        if (data == "OK") {
+                            window.location.href = "/forum";
+                        } else {
+                            alert("Couldn't delete post. Please try again later.");
+                        }
+                    }
+                });
             });
         });
     </script>
