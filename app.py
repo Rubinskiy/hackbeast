@@ -142,7 +142,7 @@ def profile(username=None):
       return redirect('/404')
    else:
       cursor = mysql.connection.cursor()
-      cursor.execute('''SELECT id, username, ppic, is_verified, is_mod, bio, reg_date FROM profiles WHERE username=%s;''', ([username]))
+      cursor.execute('''SELECT id, username, ppic, is_verified, is_mod, bio, reg_date, instagram, twitter, github, linkedin FROM profiles WHERE username=%s;''', ([username]))
       mysql.connection.commit()
       data = cursor.fetchone()
       if data == None:
@@ -288,6 +288,23 @@ def api_forum(post_id=None, post_type=None, action=None):
          img_without_exif = Image.new(img.mode, img.size)
          img_without_exif.putdata(data)
          img_without_exif.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+   # Edit profile
+   elif action == "ed-p":
+      username = request.form['lmao'].lower()
+      bio = profanity.censor(request.form['what'])
+      instagram = request.form['are']
+      twitter = request.form['you']
+      github = request.form['looking']
+      linkedin = request.form['at']
+      if len(username) > 0 and len(username) <= 16:
+         if dbf.check_user_exists(cursor=cursor, username=username) and session['uname'] != username:
+            return "Username already taken"
+         else:
+            cursor.execute('''UPDATE profiles SET username=%s, bio=%s, instagram=%s, twitter=%s, github=%s, linkedin=%s WHERE id=%s;''',
+            ([username, bio, instagram, twitter, github, linkedin, post_id]))
+            session['uname'] = username
+      else:
+         return "Invalid username"
    cursor.close()
 
    try:

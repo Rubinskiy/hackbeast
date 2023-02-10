@@ -63,18 +63,26 @@
                             <div class="columns">
                                 <div class="column">
                                     <div class="columns is-mobile">
-                                        <div class="column is-1">
-                                            <a href="#"><span class="bi bi-instagram"></span></a>
-                                        </div>
-                                        <div class="column is-1">
-                                            <a href="#"><span class="bi bi-twitter"></span></a>
-                                        </div>
-                                        <div class="column is-1">
-                                            <a href="#"><span class="bi bi-github"></span></a>
-                                        </div>
-                                        <div class="column is-1">
-                                            <a href="#"><span class="bi bi-linkedin"></span></a>
-                                        </div>
+                                        {% if data[7]|length > 1 %}
+                                            <div class="column is-1">
+                                                <a href="https://www.instagram.com/{{data[7]}}/" target="_blank"><span class="bi bi-instagram"></span></a>
+                                            </div>
+                                        {% endif %}
+                                        {% if data[8]|length > 1 %}
+                                            <div class="column is-1">
+                                                <a href="https://twitter.com/{{data[8]}}/" target="_blank"><span class="bi bi-twitter"></span></a>
+                                            </div>
+                                        {% endif %}
+                                        {% if data[9]|length > 1 %}
+                                            <div class="column is-1">
+                                                <a href="https://github.com/{{data[9]}}/" target="_blank"><span class="bi bi-github"></span></a>
+                                            </div>
+                                        {% endif %}
+                                        {% if data[10]|length > 1 %}
+                                            <div class="column is-1">
+                                                <a href="{{data[10]}}" target="_blank"><span class="bi bi-linkedin"></span></a>
+                                            </div>
+                                        {% endif %}
                                     </div>
                                     <p>
                                         <strong>Bio:</strong> {{data[5]}}
@@ -98,11 +106,11 @@
                                     <hr />
                                     <div class="columns">
                                         <div class="column">
-                                            <a href="#">Edit profile <span class="bi bi-pencil" style="font-size: 13px;"></span></a><br />
+                                            <a href="" id="open-edit-profile-modal">Edit profile <span class="bi bi-pencil" style="font-size: 13px;"></span></a><br />
                                             <small style="font-size:11px;">Your profile and changes will be visible to everyone.</small>
                                         </div>
                                         <div class="column">
-                                            <a href="#">Settings <span class="bi bi-gear" style="font-size: 13px;"></span></a><br />
+                                            <a href="" id="">Settings <span class="bi bi-gear" style="font-size: 13px;"></span></a><br />
                                             <small style="font-size:11px;">Review the settings to your account here.</small>
                                         </div>
                                     </div>
@@ -135,6 +143,67 @@
                         <a id="close-pfp-modal" class="button is-info one btn-round is-fixed-top">Cancel</a>
                     </div>
                 </form>
+            </div>
+        </div>
+    </div>
+    <div id="edit-profile-modal" class="modal">
+        <div class="modal-background"></div>
+        <div class="modal-content">
+            <div class="box round">
+                <p><strong>Edit your profile</strong></p>
+                <small>Click 'Save' to update your profile details.</small><br />
+                <div style="padding-top: 15px;"></div>
+                <div class="columns">
+                    <div class="column">
+                        <div class="field">
+                            <label class="label">Username</label>
+                            <div class="control">
+                                <input id="uname" class="input" type="text" placeholder="Username" minlength="4" maxlength="16" pattern="^[a-zA-Z0-9]+$" title="Lower case letters and/or numbers" value="{{data[1]}}">
+                            </div>
+                        </div>
+                        <div class="field">
+                            <label class="label">Bio</label>
+                            <div class="control">
+                                <textarea id="bio" class="textarea" placeholder="Some things about yourself.." maxlength="200">{{data[5]}}</textarea>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="columns">
+                    <div class="column">
+                        <div class="field">
+                            <label class="label">Instagram Handle <span class="bi bi-instagram"></span></label>
+                            <div class="control">
+                                <input id="insta" class="input" type="text" placeholder="E.g. johndoe" value="{{data[7]}}">
+                            </div>
+                        </div>
+                        <div class="field">
+                            <label class="label">Twitter Handle <span class="bi bi-twitter"></span></label>
+                            <div class="control">
+                                <input id="twt" class="input" type="text" placeholder="E.g. johndoe" value="{{data[8]}}">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="column">
+                        <div class="field">
+                            <label class="label">Github Username <span class="bi bi-github"></span></label>
+                            <div class="control">
+                                <input id="gthb" class="input" type="text" placeholder="E.g. JohnDoe" value="{{data[9]}}">
+                            </div>
+                        </div>
+                        <div class="field">
+                            <label class="label">Link to LinkedIn Profile <span class="bi bi-linkedin"></span></label>
+                            <div class="control">
+                                <input id="lnkdn" class="input" type="text" placeholder="E.g. https://www.linkedin.com/in/john-doe-12345678" value="{{data[10]}}">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div style="padding-top: 15px;"></div>
+                <div class="buttons is-right">
+                    <button id="submit-edit-profile" class="button is-danger one btn-round is-fixed-top" type="submit">Save changes</button>
+                    <a id="close-edit-profile-modal" class="button is-info one btn-round is-fixed-top">Cancel</a>
+                </div>
             </div>
         </div>
     </div>
@@ -182,18 +251,67 @@
                     processData: false
                 });
             });
+            $("#submit-edit-profile").click(function(event) {
+                $(this).addClass("is-loading");
+                var uname = $('#uname').val();
+                var bio = $('#bio').val();
+                var insta = $('#insta').val();
+                var twt = $('#twt').val();
+                var gthb = $('#gthb').val();
+                var lnkdn = $('#lnkdn').val();
+                if (uname.length > 0 && uname.length <= 16) {
+                    $.ajax({
+                        url: "/api/v1/{{session['id']}}/69/ed-p",
+                        type: 'POST',
+                        data: {
+                            lmao: uname,
+                            what: bio,
+                            are: insta,
+                            you: twt,
+                            looking: gthb,
+                            at: lnkdn
+                        },
+                        success: function (response) {
+                            console.log(response);
+                            // get response code
+                            if (response == "OK") {
+                                window.location.href = "/profile/" + uname;
+                            } else if (response == "Username already taken") {
+                                alert("That username has already been taken. Please choose another one.");
+                            } else {
+                                alert("An error occured while trying to update your profile. Please try again later.");
+                            }
+                        }
+                    });
+                } else {
+                    alert("You can't have a blank username.");
+                }
+                $(this).removeClass("is-loading");
+            });
         });
 
-        // open modal
+        // open pfp modal
         $('#open-pfp-modal').on('click', function(e) {
             e.preventDefault();
             $('#pfp-modal').addClass('is-active');
         });
 
-        // close modal
+        // close pfp modal
         $('#close-pfp-modal').on('click', function(e) {
             e.preventDefault();
             $('#pfp-modal').removeClass('is-active');
+        });
+
+        // open edit profile modal
+        $('#open-edit-profile-modal').on('click', function(e) {
+            e.preventDefault();
+            $('#edit-profile-modal').addClass('is-active');
+        });
+
+        // close edit profile modal
+        $('#close-edit-profile-modal').on('click', function(e) {
+            e.preventDefault();
+            $('#edit-profile-modal').removeClass('is-active');
         });
     </script>
 {% endblock %}
