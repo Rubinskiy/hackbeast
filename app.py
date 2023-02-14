@@ -142,7 +142,7 @@ def profile(username=None):
       return redirect('/404')
    else:
       cursor = mysql.connection.cursor()
-      cursor.execute('''SELECT id, username, ppic, is_verified, is_mod, bio, reg_date, instagram, twitter, github, linkedin FROM profiles WHERE username=%s;''', ([username]))
+      cursor.execute('''SELECT id, username, ppic, is_verified, is_mod, bio, reg_date, instagram, twitter, github, linkedin, is_banned FROM profiles WHERE username=%s;''', ([username]))
       mysql.connection.commit()
       data = cursor.fetchone()
       if data == None:
