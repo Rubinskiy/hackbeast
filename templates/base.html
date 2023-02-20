@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.6.2/css/bulma.min.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Montserrat" />
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    {% block head %}{% endblock %}
+</head>
+<body>
+    <div class="container is-fluid">
+        <nav class="navbar is-dark has-shadow" role="navigation" aria-label="main navigation">
+            <div class="container">
+                <!-- logo or branding image on left side -->
+                <div class="navbar-brand">
+                    <img src="http://hackershaven.eu/images/logo.png" style="margin-right:12px;" alt="HackersHaven: The modern hacker forum" width="52" height="48">
+                    <a class="navbar-item is-hidden-desktop" href="/">
+                        <h1 class="title has-text-white is-4">HackersHaven</h1>
+                    </a>
+                    <div class="navbar-burger" data-target="navbar-menu">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </div>
+                </div>
+                <!-- children of navbar-menu must be navbar-start and/or navbar-end -->
+                <div class="navbar-menu" id="navbar-menu">
+                    <!-- navbar items | left side -->
+                    <div class="navbar-start">
+                        <a class="navbar-item" href="/"> Home</a>
+                        <a class="navbar-item" href="/forum">Forum&nbsp;&nbsp;<span class="tag is-danger">NEW</span></a>
+                        <a class="navbar-item" href="#">Projects</a>
+                        <a class="navbar-item" href="#">Contact</a>
+                    </div>
+                    <!-- navbar items | right side -->
+                    <div class="navbar-end">
+                        {% if session.token %}
+                            <a class="navbar-item" href="/forum/create"><span class="bi bi-sticky"></span></a>
+                            <a class="navbar-item" href="#"><span class="bi bi-bell"></span></a>
+                            <div class="navbar-item has-dropdown is-hoverable">
+                                <a class="navbar-link has-text-white"><span class="bi bi-person-circle"></span>&nbsp;&nbsp;&nbsp;{{ session.uname }}</a>
+                                <div class="navbar-dropdown is-right">
+                                    <a href="/profile/{{session.uname}}" class="navbar-item">Profile</a>
+                                    <a class="navbar-item">Settings</a>
+                                    <hr class="navbar-divider">
+                                    <a class="navbar-item" href="/logout">Log out</a>
+                                </div>
+                            </div>
+                        {% else %}
+                            <a class="navbar-item" href="/login">Login</a>
+                            <a class="navbar-item" href="/register">Register</a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </nav>
+        <div style="padding-top: 8vh;"></div>
+        {% block body %}{% endblock %}
+        <div style="padding-top: 10vh;"></div>
+        <footer class="footer is-dark">
+            <div class="columns">
+                <div class="column is-4">
+                    <div class="content">
+                        <h4 class="title has-text-white is-4">HackBeast</h4>
+                        <p style="font-size: 11px;" class="subtitle has-text-white">Previously named HackersHaven</p>
+                        <p id="copyright" class="subtitle has-text-white is-6"></p>
+                    </div>
+                </div>
+                <div class="column is-3">
+                    <div class="content">
+                        <h4 class="title has-text-white is-4">Company</h4>
+                        <ul>
+                            <li><a href="#">About</a></li>
+                            <li><a href="#">Work Here</a></li>
+                            <li><a href="#">Legal</a></li>
+                            <li><a href="#">Privacy Policy</a></li>
+                            <li><a href="#">Terms of Service</a></li>
+                            <li><a href="#">Contact Us</a></li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="column is-2">
+                    <div class="content">
+                        <h4 class="title has-text-white is-4">Links</h4>
+                        <ul>
+                            <li><a href="#">Home</a></li>
+                            <li><a href="#">Forum</a></li>
+                            <li><a href="#">Projects</a></li>
+                            <li><a href="#">Contact</a></li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="column is-3">
+                    <div class="content">
+                        <h4 class="title has-text-white is-4">Social</h4>
+                        <ul>
+                            <li><a href="#">Instagram</a></li>
+                            <li><a href="#">Linkedin</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </footer>
+    </div>
+    <script>
+        var year = new Date().getFullYear();
+        document.getElementById("copyright").innerHTML = "Copyright &copy; 2021 - " + year + " HackBeast.org.<br /><span style=\"font-size:10px;\">All rights reserved. HackBeast is fully owned by <a href=\"#\">HivyMedia</a>.<br />rev number 2023.1.20.50432</span>";
+    </script>
+</body>
+</html>
