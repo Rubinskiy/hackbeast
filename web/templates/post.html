@@ -2,6 +2,7 @@
 
 {% block head %}
     <title>Post</title>
+    <script src="https://unpkg.com/bulma-toast"></script>
     <script src="https://cdn.jsdelivr.net/gh/google/code-prettify@master/loader/run_prettify.js"></script>
 {% endblock %}
 
@@ -31,13 +32,14 @@
                                         <span class="modtext">[mod]</span>
                                     {% endif %}</a>
                                     <span id="time"> - {{get_post_time(data[0][7])}}</span>
+                                    in <a href="#">Tools and resources</a>
                                 </small>
                             </span>
                         </div>
                             <nav class="level is-mobile">
                                 <div class="level-left">
                                     <a class="level-item" aria-label="share">
-                                        <span class="bi bi-share"></span>
+                                        <span onclick="get_url()" class="bi bi-share"></span>
                                     </a>
                                     <a class="level-item" aria-label="comment">
                                         <span id="comms-0" class="bi bi-chat">&nbsp;{{data[3][0]}}</span>
@@ -238,6 +240,30 @@
                 $('#like-0').html("&nbsp;" + (likes + 1));
             } else {
                 $('#like-0').html("&nbsp;" + (likes - 1));
+            }
+        }
+        var dummy = document.createElement('input'),
+        text = window.location.href;
+        function get_url() {
+            try {
+                document.body.appendChild(dummy);
+                dummy.value = text;
+                dummy.select();
+                document.execCommand('copy');
+                document.body.removeChild(dummy);
+                bulmaToast.toast({
+                    message: 'Link copied to clipboard',
+                    type: 'is-info',
+                    position: 'bottom-left',
+                    duration: 3000,
+                });
+            } catch (err) {
+                bulmaToast.toast({
+                    message: 'Could not copy link to clipboard',
+                    type: 'is-danger',
+                    position: 'bottom-left',
+                    duration: 3000,
+                });
             }
         }
         $(document).ready(function() {

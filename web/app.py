@@ -1,17 +1,24 @@
 from flask import Flask, render_template, request, session, redirect, jsonify
+from werkzeug.utils import secure_filename
 from flask_mysqldb import MySQL
 from flask_session import Session
 from better_profanity import profanity
 from uuid import uuid4
 import helpers.dbfunc as dbf
 from helpers.filters import nl2br
+from PIL import Image
 import random
 import hashlib
 import datetime
 import time
+import os
+
+UPLOAD_FOLDER = os.getcwd() + '/pfps'
+UPLOAD_FOLDER = UPLOAD_FOLDER.replace(os.sep, '/')
+ALLOWED_EXTENSIONS = set(['png', 'jpg', 'jpeg', 'gif'])
 
 app = Flask(__name__)
-app.secret_key = "myBbyIsASuperCutePumpkinPie"
+app.secret_key = "sevenSeasBroughtTogetherForIceCream"
 app.config['SESSION_PERMANENT'] = False
 app.config['SESSION_TYPE'] = 'filesystem'
 Session(app)
@@ -22,6 +29,8 @@ app.config['MYSQL_PASSWORD'] = ''
 app.config['MYSQL_DB'] = 'superbarreldb'
 app.config['MYSQL_CHARSET'] = 'utf8mb4'
 app.config['MYSQL_COLLATION'] = 'utf8mb4_unicode_ci'
+
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 mysql = MySQL(app)
 
@@ -40,7 +49,7 @@ profanity.load_censor_words(custom_curse_words)
 @app.errorhandler(404)
 def not_found(e):
    title = "404"
-   return render_template('404.html', title=title, error=e)
+   return render_template('404.html', title=title, error="We couldn't find that page.")
 
 @app.errorhandler(500)
 def not_found(e):
@@ -60,7 +69,7 @@ def home():
 @app.route('/forum')
 def forum():
    cursor = mysql.connection.cursor()
-   cursor.execute('''SELECT profiles.username, profiles.is_verified, profiles.is_mod, profiles.ppic, posts.id, title, timestamp FROM profiles, posts WHERE profiles.id = user_id AND type=1 ORDER BY timestamp DESC LIMIT 6''')
+   cursor.execute('''SELECT profiles.username, profiles.is_verified, profiles.is_mod, profiles.ppic, posts.id, title, timestamp FROM profiles, posts WHERE profiles.id = user_id AND type=1 ORDER BY timestamp DESC LIMIT 10''')
    mysql.connection.commit()
    data = cursor.fetchall()
    cursor.close()
@@ -102,7 +111,6 @@ def forum_page(id=None, page=None):
    if page == None or id == None:
       return redirect('/404')
    else:
-      # if session['id'] does not exist
       if not session.get("id"):
          session_id = 0
       else:
@@ -134,7 +142,7 @@ def profile(username=None):
       return redirect('/404')
    else:
       cursor = mysql.connection.cursor()
-      cursor.execute('''SELECT id, username, ppic, is_verified, is_mod, reg_date FROM profiles WHERE username=%s;''', ([username]))
+      cursor.execute('''SELECT id, username, ppic, is_verified, is_mod, bio, reg_date, instagram, twitter, github, linkedin, is_banned FROM profiles WHERE username=%s;''', ([username]))
       mysql.connection.commit()
       data = cursor.fetchone()
       if data == None:
@@ -150,13 +158,16 @@ def profile(username=None):
 @app.route('/login')
 def login():
    if not session.get("token"):
-      return render_template('login.html')
+      referrer = request.referrer
+      return render_template('login.html', ref=referrer)
    return redirect("/")
+
 @app.route('/register')
 def register():
    if not session.get("token"):
       return render_template('register.html')
    return redirect("/")
+
 @app.route('/logout')
 def logout():
    session.clear()
@@ -182,7 +193,13 @@ def authlog():
          session['verified'] = success[3]
          session['mod'] = success[4]
          session['ppic'] = success[5]
-         return redirect('/')
+         referrer = request.args.get('ref')
+         if referrer == None:
+            return redirect('/')
+         elif "hackbeast.org" not in referrer:
+            return redirect('/')
+         else:
+            return redirect(referrer)
       else:
          return render_template('login.html', msg="Invalid Email/Username or Password.")
    cursor.close()
@@ -204,7 +221,7 @@ def authreg():
          pwd = hashlib.sha256(pwd.encode('utf-8')).hexdigest()
          ip_address = request.remote_addr
          cursor.execute(''' INSERT INTO profiles (id, name, username, email, pwd, ip_address, last_ip) VALUES(%s, %s, %s, %s, %s, %s, %s)''', 
-         (''.join((random.choice('abcdefghijklmnopqrstuvwxyz1234567890') for i in range(12))), name, username, email, pwd, ip_address, ip_address))
+         (''.join((random.choice('ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890') for i in range(8))), name, username, email, pwd, ip_address, ip_address))
          try:
             mysql.connection.commit()
          except mysql.IntegrityError:
@@ -214,9 +231,16 @@ def authreg():
             return render_template("login.html", msg="Account created! Please login to continue.", type="success")
 
 # -----------------API-----------------#
+def allowed_file(filename):
+    return '.' in filename and \
+           filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+           
 @app.route('/api/v1/<post_id>/<post_type>/<action>', methods=['POST'])
 def api_forum(post_id=None, post_type=None, action=None):
    response = ""
+   # user must be logged in
+   if not session.get("token") and action != "c-c":
+      return "You must be logged in to perform this action."
    if post_id==None or post_type==None or action==None:
       return "Invalid request", 400
    # Like functionality
@@ -244,6 +268,43 @@ def api_forum(post_id=None, post_type=None, action=None):
    elif action == "d":
       cursor.execute('''DELETE FROM posts WHERE posts.id=%s AND posts.user_id=%s AND posts.type=%s;''', 
       (post_id, session['id'], post_type))
+   # Profile picture
+   elif action == "p":
+      if 'file' not in request.files:
+         return "No file part", 400
+      file = request.files['file']
+      if file.filename == '':
+         return "No selected file", 400
+      if file and allowed_file(file.filename):
+         filename = secure_filename(file.filename)
+         file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+         cursor.execute('''UPDATE profiles SET ppic=%s WHERE id=%s;''', 
+         ([app.config['UPLOAD_FOLDER'] + "/" + filename, post_id]))
+         session['ppic'] = app.config['UPLOAD_FOLDER'] + "/" + filename
+
+         # strip metadata
+         img = Image.open(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+         data = list(img.getdata())
+         img_without_exif = Image.new(img.mode, img.size)
+         img_without_exif.putdata(data)
+         img_without_exif.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+   # Edit profile
+   elif action == "ed-p":
+      username = request.form['lmao'].lower()
+      bio = profanity.censor(request.form['what'])
+      instagram = request.form['are']
+      twitter = request.form['you']
+      github = request.form['looking']
+      linkedin = request.form['at']
+      if len(username) > 0 and len(username) <= 16:
+         if dbf.check_user_exists(cursor=cursor, username=username) and session['uname'] != username:
+            return "Username already taken"
+         else:
+            cursor.execute('''UPDATE profiles SET username=%s, bio=%s, instagram=%s, twitter=%s, github=%s, linkedin=%s WHERE id=%s;''',
+            ([username, bio, instagram, twitter, github, linkedin, post_id]))
+            session['uname'] = username
+      else:
+         return "Invalid username"
    cursor.close()
 
    try:
