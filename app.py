@@ -221,7 +221,7 @@ def authreg():
          pwd = hashlib.sha256(pwd.encode('utf-8')).hexdigest()
          ip_address = request.remote_addr
          cursor.execute(''' INSERT INTO profiles (id, name, username, email, pwd, ip_address, last_ip) VALUES(%s, %s, %s, %s, %s, %s, %s)''', 
-         (''.join((random.choice('abcdefghijklmnopqrstuvwxyz1234567890') for i in range(12))), name, username, email, pwd, ip_address, ip_address))
+         (''.join((random.choice('ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890') for i in range(8))), name, username, email, pwd, ip_address, ip_address))
          try:
             mysql.connection.commit()
          except mysql.IntegrityError:
