@@ -1,0 +1,46 @@
+
+2. Make every user only allowed to post after 1 day of registration
+3. https://realpython.com/handling-email-confirmation-in-flask/
+4. Make captcha for registration = https://python.plainenglish.io/how-to-use-google-recaptcha-with-flask-dbd79d5ea193
+(USE cloudflare FOR CAPTCHA)
+5. donation make masjid from the profits
+6. donate for ophanges and workshops for education
+7. make a field for "references" when wanting to post
+8. make 404
+9. https://giphy.com/gifs/space-planet-outer-j5mwjor5i5PGigmPH2
+
+11. https://www.youtube.com/watch?v=4CJMpZfK1rI&t=4810s
+12. CHANGE URL PATH instead of /12/test-post, make it /12-test-post
+13. https://docs.deta.sh/docs/drive/py_tutorial/
+14. https://codewithawa.com/posts/creating-a-comment-and-reply-system-php-and-mysql
+    https://stackoverflow.com/questions/30928588/how-to-add-comments-feature-to-posts-in-a-flask-web-application
+
+16. https://intellij-support.jetbrains.com/hc/en-us/community/posts/207279945-Is-there-a-way-to-reformat-a-multi-line-list-into-a-single-line-and-vice-versa-
+17. Gmaelan music for the post of the instagram
+18. update IP on login
+19. use replace() to sanitize url when visiting post so that a post with title <script> can still be seen
+20. every month or year nominate someone to have a special badge
+21. https://github.com/TrailBlazerZ/imgaptcha--api
+
+23. check if request to api is coming from hackbeast.org. if different, return 403
+24. add the base64 link in post.html post data request from delete post for sign up to work with us and also profile.html
+25. add report button to posts
+26. when deleting a post, delete all the comments and likes to that post too
+
+25. delete your own comment feature
+26. in app.py when login and checking if the referrer had "hackbeast.org" in it
+27. add mod division ability to post to announcements
+28. add mod division ability to ban people from their profile but uses a secret key to use their powers
+29. replace < and ` tags from title with something else
+30. add tag on profile to see if it is banned
+31. make pin comment to post by adding pin id in posts
+32. make a url redirect checker before visiting a link
+33. add report flags to posts, comments
+34. add mod ability to delete posts and comments and also archive them
+35. https://paid4link.com/payout-rates
+
+
+git init
+git add .
+git commit -m "Add existing project files to Git"
+git push -u -f origin master
