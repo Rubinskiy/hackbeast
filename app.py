@@ -5,7 +5,7 @@ from flask_session import Session
 from better_profanity import profanity
 from uuid import uuid4
 import helpers.dbfunc as dbf
-from helpers.filters import nl2br
+from helpers.filters import nl2br, text_filters, h1
 from PIL import Image
 import random
 import hashlib
@@ -35,13 +35,11 @@ app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 mysql = MySQL(app)
 
 app.jinja_env.filters['nl2br'] = nl2br
+app.jinja_env.filters['text_filters'] = text_filters
+app.jinja_env.filters['h1'] = h1
 
 # https://github.com/snguyenthanh/better_profanity/blob/master/better_profanity/profanity_wordlist.txt
 custom_curse_words = [
-   'areole', 
-   'arian',
-   'aryan',
-   'asanchez',
    'shit'
 ]
 profanity.load_censor_words(custom_curse_words)

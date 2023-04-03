@@ -73,9 +73,9 @@
                                 {% for code in data[0][6].split('[code]') %}
                                     {% if loop.index > 1 %}
                                         <pre class="prettyprint prefield">{{code.split('[/code]')[0]}}</pre>
-                                        {{code.split('[/code]')[1]}}
+                                        {{code.split('[/code]')[1]|h1|text_filters|nl2br}}
                                     {% else %}
-                                        {{code|nl2br}}
+                                        {{code|h1|text_filters|nl2br}}
                                     {% endif %}
                                 {% endfor %}
                             </p>
