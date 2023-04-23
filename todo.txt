@@ -38,7 +38,19 @@
 33. add report flags to posts, comments
 34. add mod ability to delete posts and comments and also archive them
 35. https://paid4link.com/payout-rates
+36. sitemap for dynamic pages:
+Updating the sitemap every time you update your CMS will definitely create performance issues, because sitemaps tend to be large, and costly to generate (from a CPU & disk i/o perspective).
 
+What I would do is:
+1. map out the structure of your site
+2. determine which areas you need to link to in the sitemap
+3. add the name of the sitemap index to your robots.txt file
+4. write a script that will read from the database and generate static xml sitemap files
+5. create a cron job that will re-run this script on a regular basis
+6. submit your sitemap url to the search engines
+
+37. for the sidebar boxes you'll be able to put "put your ads here" and it could be like an oprec from ukm or petrolida because so many ITS students use the site
+38. make for different languages like id.prakteek.com
 
 git init
 git add .

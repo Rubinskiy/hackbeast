@@ -109,11 +109,11 @@
                                     <hr />
                                     <div class="columns">
                                         <div class="column">
-                                            <a href="" id="open-edit-profile-modal">Edit profile <span class="bi bi-pencil" style="font-size: 13px;"></span></a><br />
+                                            <a href="" id="open-edit-profile-modal"><span class="bi bi-pencil" style="font-size: 13px;"></span> Edit profile</a><br />
                                             <small style="font-size:11px;">Your profile and changes will be visible to everyone.</small>
                                         </div>
                                         <div class="column">
-                                            <a href="" id="">Settings <span class="bi bi-gear" style="font-size: 13px;"></span></a><br />
+                                            <a href="" id="open-settings-modal"><span class="bi bi-gear" style="font-size: 13px;"></span> Settings</a><br />
                                             <small style="font-size:11px;">Review the settings to your account here.</small>
                                         </div>
                                     </div>
@@ -123,13 +123,30 @@
                     </article>
                     <div style="padding-top: 25px;"></div>
                 </div>
-
-                
             </div>
             <div class="column"></div>
         </div>
     </div>
 
+    <!-- settings modal -->
+    <div id="settings-modal" class="modal">
+        <div class="modal-background"></div>
+        <div class="modal-content">
+            <div class="box round">
+                <p><strong>Settings</strong></p>
+                <small>Click 'Save changes' to update your account settings.</small><br />
+                
+                <div style="padding-top: 15px;"></div>
+                <div class="buttons is-right">
+                    <button class="button is-danger one btn-round is-fixed-top" type="submit">Save changes</button>
+                    <a id="close-settings-modal" class="button is-info one btn-round is-fixed-top">Cancel</a>
+                </div>
+            </div>
+        </div>
+        <button class="modal-close is-large" aria-label="close" id="close-settings-modal"></button>
+    </div>
+
+    <!-- pfp modal -->
     <div id="pfp-modal" class="modal">
         <div class="modal-background"></div>
         <div class="modal-content">
@@ -149,12 +166,14 @@
             </div>
         </div>
     </div>
+
+    <!-- edit profile modal -->
     <div id="edit-profile-modal" class="modal">
         <div class="modal-background"></div>
         <div class="modal-content">
             <div class="box round">
                 <p><strong>Edit your profile</strong></p>
-                <small>Click 'Save' to update your profile details.</small><br />
+                <small>Click 'Save changes' to update your profile details.</small><br />
                 <div style="padding-top: 15px;"></div>
                 <div class="columns">
                     <div class="column">
@@ -315,6 +334,18 @@
         $('#close-edit-profile-modal').on('click', function(e) {
             e.preventDefault();
             $('#edit-profile-modal').removeClass('is-active');
+        });
+
+        // open settings modal
+        $('#open-settings-modal').on('click', function(e) {
+            e.preventDefault();
+            $('#settings-modal').addClass('is-active');
+        });
+
+        // close settings modal
+        $('#close-settings-modal').on('click', function(e) {
+            e.preventDefault();
+            $('#settings-modal').removeClass('is-active');
         });
     </script>
 {% endblock %}

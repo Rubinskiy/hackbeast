@@ -54,6 +54,29 @@
                     </div>
                 </div>
             </div>
+            <div id="universities" class="box round main has-text-white" style="cursor: pointer;">
+                <div class="columns">
+                    <div class="column is-1">
+                        <span class="bi bi-mortarboard default-icon"></span>
+                    </div>
+                    <div class="column is-two-thirds">
+                        <span class="title is-4 has-text-white">Universities</span><br />
+                        <span style="font-size: 12px;">
+                            Discussions sorted by posts from specific universities.
+                        </span>
+                    </div>
+                    <div class="column">
+                        <nav class="level">
+                            <div class="level-item has-text-centered">
+                                <div>
+                                    <p class="heading">Posts</p>
+                                    <p class="title has-text-white">3.9K</p>
+                                </div>
+                            </div>
+                        </nav>
+                    </div>
+                </div>
+            </div>
             <div id="general" class="box round main has-text-white" style="cursor: pointer;">
                 <div class="columns">
                     <div class="column is-1">
@@ -209,6 +232,9 @@
         $(document).ready(function(){
             $("#announcements").click(function(){
                 window.location.href = "/forum/announcements";
+            });
+            $("#universities").click(function(){
+                window.location.href = "/forum/universities";
             });
             $("#general").click(function(){
                 window.location.href = "/forum/general";

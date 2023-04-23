@@ -27,7 +27,7 @@ def text_filters(eval_ctx, value):
 # filter to make all text between [h1] and [/h1] h1
 @pass_eval_context
 def h1(eval_ctx, value):
-    normalized_value = re.sub(r'\[h1\]([\s\S]*?)\[/h1\]', r'<h1 class="title has-text-black is-3">\1</h1>', value)
+    normalized_value = re.sub(r'\[h1\]([\s\S]*?)\[/h1\]', r'<h1 style="margin-bottom: 0;" class="title has-text-black is-3">\1</h1>', value)
     if eval_ctx.autoescape:
         return markupsafe.Markup(normalized_value)
     return normalized_value

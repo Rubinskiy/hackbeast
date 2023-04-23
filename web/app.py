@@ -5,7 +5,7 @@ from flask_session import Session
 from better_profanity import profanity
 from uuid import uuid4
 import helpers.dbfunc as dbf
-from helpers.filters import nl2br
+from helpers.filters import nl2br, text_filters, h1
 from PIL import Image
 import random
 import hashlib
@@ -35,13 +35,11 @@ app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 mysql = MySQL(app)
 
 app.jinja_env.filters['nl2br'] = nl2br
+app.jinja_env.filters['text_filters'] = text_filters
+app.jinja_env.filters['h1'] = h1
 
 # https://github.com/snguyenthanh/better_profanity/blob/master/better_profanity/profanity_wordlist.txt
 custom_curse_words = [
-   'areole', 
-   'arian',
-   'aryan',
-   'asanchez',
    'shit'
 ]
 profanity.load_censor_words(custom_curse_words)
@@ -52,11 +50,15 @@ def not_found(e):
    return render_template('404.html', title=title, error="We couldn't find that page.")
 
 @app.errorhandler(500)
-def not_found(e):
+def server_error(e):
    title = "Server error"
    return render_template('error.html', title=title, error=e)
 
-# 403 here
+# 403 here (CHECK AGAIN IF WORKS)
+@app.errorhandler(403)
+def forbidden(e):
+   title = "403 Forbidden"
+   return render_template('error.html', title=title, error="That page is hidden from the public.")
 
 @app.route('/')
 def home():
@@ -75,12 +77,20 @@ def forum():
    cursor.close()
    return render_template('forum.html', data=data, get_post_time=get_post_time, limit_char=limit_char)
 
+@app.route('/forum/universities')
+def universities():
+   msg = ""
+   if not session.get("token"):
+      msg = "Log in to connect with students from your university."
+   return render_template('universities.html', msg=msg)
+
 @app.route('/forum/create')
 def create():
    msg = ""
    if not session.get("token"):
       return redirect('/login')
    return render_template('create.html')
+
 @app.route('/post-content', methods=['POST'])
 def create_post():
    if not session.get("token"):
@@ -296,7 +306,7 @@ def api_forum(post_id=None, post_type=None, action=None):
       twitter = request.form['you']
       github = request.form['looking']
       linkedin = request.form['at']
-      if len(username) > 0 and len(username) <= 16:
+      if 0 < len(username) <= 16:
          if dbf.check_user_exists(cursor=cursor, username=username) and session['uname'] != username:
             return "Username already taken"
          else:

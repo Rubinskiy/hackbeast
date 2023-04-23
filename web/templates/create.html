@@ -57,11 +57,17 @@
                         <div class="control">
                             <div class="field has-addons">
                                 <p class="control">
+                                    <a class="button" id="h1-tag">
+                                        <span class="icon is-small">
+                                            <i class="bi bi-type-h1"></i>
+                                        </span>
+                                    </a>
+                                </p>
+                                <p class="control">
                                     <a class="button" id="bold-tag">
                                         <span class="icon is-small">
                                             <i class="bi bi-type-bold"></i>
                                         </span>
-                                        <span>Bold</span>
                                     </a>
                                 </p>
                                 <p class="control">
@@ -69,7 +75,20 @@
                                         <span class="icon is-small">
                                             <i class="bi bi-type-italic"></i>
                                         </span>
-                                        <span>Italic</span>
+                                    </a>
+                                </p>
+                                <p class="control">
+                                    <a class="button" id="underline-tag">
+                                        <span class="icon is-small">
+                                            <i class="bi bi-type-underline"></i>
+                                        </span>
+                                    </a>
+                                </p>
+                                <p class="control">
+                                    <a class="button" id="strike-tag">
+                                        <span class="icon is-small">
+                                            <i class="bi bi-type-strikethrough"></i>
+                                        </span>
                                     </a>
                                 </p>
                                 <p class="control">
@@ -77,7 +96,6 @@
                                         <span class="icon is-small">
                                             <i class="bi bi-braces"></i>
                                         </span>
-                                        <span>Add code section</span>
                                     </a>
                                 </p>
                             </div>
@@ -103,22 +121,88 @@
         </div>
     </div>
     <script>
+        const h1Btn = document.getElementById("h1-tag");
+        const boldBtn = document.getElementById("bold-tag");
+        const italicBtn = document.getElementById("italic-tag");
+        const underlineBtn = document.getElementById("underline-tag");
+        const strikeBtn = document.getElementById("strike-tag");
         const codeBtn = document.getElementById("code-tag");
         const textarea = document.getElementById("txt");
+        
+        h1Btn.addEventListener("click", function() {
+            var scrollPos = textarea.scrollTop;
+            addTag(textarea, 1, scrollPos);
+        });
+        boldBtn.addEventListener("click", function() {
+            var scrollPos = textarea.scrollTop;
+            addTag(textarea, 2, scrollPos);
+        });
+        italicBtn.addEventListener("click", function() {
+            var scrollPos = textarea.scrollTop;
+            addTag(textarea, 3, scrollPos);
+        });
+        underlineBtn.addEventListener("click", function() {
+            var scrollPos = textarea.scrollTop;
+            addTag(textarea, 4, scrollPos);
+        });
+        strikeBtn.addEventListener("click", function() {
+            var scrollPos = textarea.scrollTop;
+            addTag(textarea, 5, scrollPos);
+        });
         codeBtn.addEventListener("click", function() {
-            addCodeTag(textarea);
+            var scrollPos = textarea.scrollTop;
+            addTag(textarea, 6, scrollPos);
         });
 
-        function addCodeTag(textarea) {
-            const caretPos = textarea.selectionStart;
-            const currentValue = textarea.value;
-            const after = currentValue.substring(caretPos);
-            textarea.value = currentValue.substring(0, caretPos) + "[code]\r\n\r\n[/code]" + after;
-            textarea.focus();
-            // set caret between [code] and [/code]
-            textarea.selectionStart = caretPos + 7;
-            textarea.selectionEnd = caretPos + 7;
-
+        function addTag(textarea, mode, scrollPos) {
+            var curPos = textarea.selectionStart;
+            let x = $("#txt").val();
+            let text_to_insert = "";
+            if (mode == 1) {
+                // heading
+                text_to_insert = "[h1][/h1]";
+                $("#txt").val(x.slice(0, curPos) + text_to_insert + x.slice(curPos));
+                textarea.focus();
+                textarea.selectionStart = curPos + 4;
+                textarea.selectionEnd = curPos + 4;
+            } else if (mode == 2) {
+                // bold
+                text_to_insert = "[b][/b]";
+                $("#txt").val(x.slice(0, curPos) + text_to_insert + x.slice(curPos));
+                textarea.focus();
+                textarea.selectionStart = curPos + 3;
+                textarea.selectionEnd = curPos + 3;
+            } else if (mode == 3) {
+                // italics
+                text_to_insert = "[i][/i]";
+                $("#txt").val(x.slice(0, curPos) + text_to_insert + x.slice(curPos));
+                textarea.focus();
+                textarea.selectionStart = curPos + 3;
+                textarea.selectionEnd = curPos + 3;
+            } else if (mode == 4) {
+                // underline
+                text_to_insert = "[u][/u]";
+                $("#txt").val(x.slice(0, curPos) + text_to_insert + x.slice(curPos));
+                textarea.focus();
+                textarea.selectionStart = curPos + 3;
+                textarea.selectionEnd = curPos + 3;
+            } else if (mode == 5) {
+                // strikethrough
+                text_to_insert = "[s][/s]";
+                $("#txt").val(x.slice(0, curPos) + text_to_insert + x.slice(curPos));
+                textarea.focus();
+                textarea.selectionStart = curPos + 3;
+                textarea.selectionEnd = curPos + 3;
+            } else if (mode == 6) {
+                // code
+                text_to_insert = "[code]\r\n\r\n[/code]";
+                $("#txt").val(x.slice(0, curPos) + text_to_insert + x.slice(curPos));
+                textarea.focus();
+                textarea.selectionStart = curPos + 7;
+                textarea.selectionEnd = curPos + 7;
+            }
+            // set scroll position
+            textarea.scrollTop = scrollPos;
         }
     </script>
 {% endblock %}

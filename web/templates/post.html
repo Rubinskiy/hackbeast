@@ -10,14 +10,18 @@
 {% set count = namespace(value=0) %}
     <div class="container is-fluid">
         <div class="columns">
-            <div class="column"></div>
+            <div class="column">
+                <div class="box round">
+                    <p>{$panel}</p>
+                </div>
+            </div>
             <div class="column is-three-quarters">
                 <div class="box round">
                     <article class="media">
                         <div class="media-left">
-                        <figure class="image is-64x64">
-                            <img src="{{data[0][3]}}" class="is-sway" alt="{{data[0][0]}}">
-                        </figure>
+                            <figure class="image is-64x64">
+                                <img src="{{data[0][3]}}" class="is-sway" alt="{{data[0][0]}}">
+                            </figure>
                         </div>
                         <div class="media-content">
                         <div class="content">
