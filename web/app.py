@@ -118,33 +118,36 @@ def latest():
 
 @app.route('/forum/<id>/<page>')
 def forum_page(id=None, page=None):
-   if page == None or id == None:
-      return redirect('/404')
-   else:
-      if not session.get("id"):
-         session_id = 0
-      else:
-         session_id = session['id']
-
-      cursor = mysql.connection.cursor()
-      cursor.execute(
-      '''
-         SELECT profiles.username, profiles.is_verified, profiles.is_mod, profiles.ppic, posts.id, title, descr, timestamp FROM profiles, posts WHERE profiles.id=posts.user_id AND posts.id=%s AND REPLACE(posts.title, ' ', '-')=%s
-         UNION ALL SELECT COUNT(*), NULL, NULL, NULL, NULL, NULL, NULL, NULL FROM posts WHERE posts.type=2 AND posts.post_id=%s
-         UNION ALL SELECT COUNT(*), NULL, NULL, NULL, NULL, NULL, NULL, NULL FROM posts WHERE posts.type=2 AND posts.post_id=%s AND posts.user_id=%s
-         UNION ALL SELECT COUNT(*), NULL, NULL, NULL, NULL, NULL, NULL, NULL FROM posts WHERE posts.type=3 AND posts.post_id=%s;
-      ''', 
-      ([int(id), str(page), int(id), int(id), session_id, int(id)]))
-      mysql.connection.commit()
-      data = cursor.fetchall()
-      if data == None:
+   try:
+      if page == None or id == None:
          return redirect('/404')
-      cursor.execute('''SELECT profiles.username, profiles.is_verified, profiles.is_mod, profiles.ppic, posts.id, posts.descr, posts.timestamp FROM profiles, posts WHERE profiles.id=posts.user_id AND posts.type=3 AND posts.post_id=%s ORDER BY posts.timestamp DESC LIMIT 6;''',
-      ([int(id)]))
-      
-      comments = cursor.fetchall()
-      cursor.close()
-      return render_template('post.html', data=data, comments=comments, get_post_time=get_post_time)
+      else:
+         if not session.get("id"):
+            session_id = 0
+         else:
+            session_id = session['id']
+
+         cursor = mysql.connection.cursor()
+         cursor.execute(
+         '''
+            SELECT profiles.username, profiles.is_verified, profiles.is_mod, profiles.ppic, posts.id, title, descr, timestamp FROM profiles, posts WHERE profiles.id=posts.user_id AND posts.id=%s AND REPLACE(posts.title, ' ', '-')=%s
+            UNION ALL SELECT COUNT(*), NULL, NULL, NULL, NULL, NULL, NULL, NULL FROM posts WHERE posts.type=2 AND posts.post_id=%s
+            UNION ALL SELECT COUNT(*), NULL, NULL, NULL, NULL, NULL, NULL, NULL FROM posts WHERE posts.type=2 AND posts.post_id=%s AND posts.user_id=%s
+            UNION ALL SELECT COUNT(*), NULL, NULL, NULL, NULL, NULL, NULL, NULL FROM posts WHERE posts.type=3 AND posts.post_id=%s;
+         ''', 
+         ([int(id), str(page), int(id), int(id), session_id, int(id)]))
+         mysql.connection.commit()
+         data = cursor.fetchall()
+         if data == None:
+            return redirect('/404')
+         cursor.execute('''SELECT profiles.username, profiles.is_verified, profiles.is_mod, profiles.ppic, posts.id, posts.descr, posts.timestamp FROM profiles, posts WHERE profiles.id=posts.user_id AND posts.type=3 AND posts.post_id=%s ORDER BY posts.timestamp DESC LIMIT 6;''',
+         ([int(id)]))
+         
+         comments = cursor.fetchall()
+         cursor.close()
+         return render_template('post.html', data=data, comments=comments, get_post_time=get_post_time)
+   except Exception as e:
+      return render_template('error.html', title="Error.", error=e)
 
 @app.route('/profile/<username>')
 def profile(username=None):
@@ -286,7 +289,7 @@ def api_forum(post_id=None, post_type=None, action=None):
       if file.filename == '':
          return "No selected file", 400
       if file and allowed_file(file.filename):
-         filename = secure_filename(file.filename)
+         filename = secure_filename(str(uuid4()) + "." + file.filename.split(".")[1])
          file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
          cursor.execute('''UPDATE profiles SET ppic=%s WHERE id=%s;''', 
          ([app.config['UPLOAD_FOLDER'] + "/" + filename, post_id]))

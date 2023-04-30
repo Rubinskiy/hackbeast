@@ -23,7 +23,7 @@
                                 <img src="{{data[0][3]}}" class="is-sway" alt="{{data[0][0]}}">
                             </figure>
                         </div>
-                        <div class="media-content">
+                        <div class="media-content" style="overflow: hidden !important;">
                         <div class="content">
                             <p class="par title is-4">{{data[0][5]}}</p>
                             <span>
@@ -102,7 +102,7 @@
                                     </p>
                                 </figure>
                                 <div class="media-content">
-                                    <div class="content">
+                                    <div id="comment-parent-{{count.value}}" class="content">
                                         <p>
                                             <a href="/profile/{{comment[0]}}">{{comment[0]}}
                                             {% if comment[1] == 1 %}
@@ -116,7 +116,7 @@
                                             {{comment[5]}}
                                             <br>
                                             <small>
-                                                <a>Reply</a> · 
+                                                <a href="" onclick="reply_comment({{count.value}});return false;">Reply</a> · 
                                                 <a aria-label="replies">See replies&nbsp;<span class="bi bi-chevron-down"></span></a>
                                             </small>
                                         </p>
@@ -192,7 +192,7 @@
                         <article class="media">
                             <figure class="media-left">
                                 <p class="image is-64x64">
-                                    <img src="{{session.ppic}}" class="is-sway" alt="{{data[0][0]}}">
+                                    <img src="{{session.ppic}}" class="is-sway" alt="{{session.uname}}">
                                 </p>
                             </figure>
                             <div class="media-content">
@@ -439,5 +439,33 @@
                 });
             });
         });
+
+        // comment-$num
+        function reply_comment(comment_id) {
+                var input = `
+                <article class="media">
+                    <figure class="media-left">
+                        <p class="image is-64x64">
+                            <img src="{{session.ppic}}" class="is-sway" alt="{{session.uname}}">
+                        </p>
+                    </figure>
+                    <div class="media-content">
+                        <div class="field">
+                            <p class="control">
+                                <textarea class="textarea btn-round2" name="content" placeholder="Add a comment.." rows="2" minlength="1" maxlength="600" required></textarea>
+                            </p>
+                        </div>
+                        <div class="field">
+                            <p class="control">
+                                <span class="button btn-round is-info" id="reply-` + comment_id + `">
+                                    Reply
+                                </span>
+                            </p>
+                        </div>
+                    </div>
+                `;
+                let name = '#comment-parent-' + String(comment_id);
+                $(name).append(input);
+            }
     </script>
 {% endblock %}

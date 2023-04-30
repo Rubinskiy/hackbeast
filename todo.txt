@@ -51,8 +51,5 @@ What I would do is:
 
 37. for the sidebar boxes you'll be able to put "put your ads here" and it could be like an oprec from ukm or petrolida because so many ITS students use the site
 38. make for different languages like id.prakteek.com
-
-git init
-git add .
-git commit -m "Add existing project files to Git"
-git push -u -f origin master
+39. make logging for every user activity so if theres a breach you can understand who and when he did it (use https://newrelic.com/lp/logs-wglp-logging-application)
+40. add logging as error everytim the /error page has been visited

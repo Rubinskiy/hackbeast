@@ -16,6 +16,9 @@
             border-radius: 15px;
             background-color: gainsboro;
         }
+        a.mod-link:hover {
+            color: #fa5f89 !important;
+        }
     </style>
 {% endblock %}
 
@@ -97,7 +100,7 @@
                                             This account is <a href="#" style="text-decoration: underline;">verified</a> <span class="bi bi-patch-check is-verified"></span><br />
                                         {% endif %} 
                                         {% if data[4] == 1 %}
-                                            This is a <span class="modtext"><a href="#"style="text-decoration: underline; color: #fc0547;">[moderator]</a></span> account.<br />
+                                            This is a <span class="modtext"><a class="mod-link" href="#" style="text-decoration: underline; color: #fc0547;">[moderator]</a></span> account.<br />
                                         {% endif %}
                                         {{data[1]}} has made {{stats[0][0]}} post(s).<br />
                                         <strong>Joined:</strong> {{data[6]|string}}.
@@ -143,7 +146,6 @@
                 </div>
             </div>
         </div>
-        <button class="modal-close is-large" aria-label="close" id="close-settings-modal"></button>
     </div>
 
     <!-- pfp modal -->
@@ -236,6 +238,8 @@
             if (file[0].size > 1048576){
                 alert("The file you were trying to upload is more than the 1MB limit. Please resize the image or choose another one.");
                 this.value = "";
+                document.getElementById("file").value = "";
+                return false;
             };
             if (file.length > 0) {
                 var fileReader = new FileReader();
