@@ -53,3 +53,5 @@ What I would do is:
 38. make for different languages like id.prakteek.com
 39. make logging for every user activity so if theres a breach you can understand who and when he did it (use https://newrelic.com/lp/logs-wglp-logging-application)
 40. add logging as error everytim the /error page has been visited
+41. make a maintenance paage where when you need maintenace you go to .htaccess and you redirect all requests to the page
+42. for all scripts in page, if it is a function that you need when session.token is available, then remove it if not login 

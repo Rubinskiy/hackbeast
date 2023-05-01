@@ -74,7 +74,7 @@
                                 </div>
                             </nav>
                             <p>
-                                {% for code in data[0][6].split('[code]') %}
+                                {% for code in (data[0][6]|escape).split('[code]') %}
                                     {% if loop.index > 1 %}
                                         <pre class="prettyprint prefield">{{code.split('[/code]')[0]}}</pre>
                                         {{code.split('[/code]')[1]|h1|text_filters|nl2br}}
@@ -116,7 +116,9 @@
                                             {{comment[5]}}
                                             <br>
                                             <small>
-                                                <a href="" onclick="reply_comment({{count.value}});return false;">Reply</a> · 
+                                                {% if session.token %}
+                                                    <a id="reply-{{count.value}}" href="javascript:;" onclick="reply_comment({{count.value}});return false;">Reply</a> · 
+                                                {% endif %}
                                                 <a aria-label="replies">See replies&nbsp;<span class="bi bi-chevron-down"></span></a>
                                             </small>
                                         </p>
@@ -306,8 +308,9 @@
                             if (data == "OK") {
                                 $('textarea[name="content"]').val("");
                                 $('#comms-0').click();
+                                var id = Math.floor(Math.random() * 1000000);
                                 var comment = `
-                                <article class="media">
+                                <article class="media" id="${id}">
                                     <figure class="media-left">
                                         <p class="image is-64x64">
                                             <img src="{{session.ppic}}" class="is-sway" alt="{{session.uname}}">
@@ -328,7 +331,7 @@
                                                 ` + content + `
                                                 <br>
                                                 <small>
-                                                    <a>Reply</a> · 
+                                                    <a id="reply-${id}" href="javascript:;" onclick="reply_comment(${id});return false;">Reply</a> · 
                                                     <a aria-label="replies">See replies&nbsp;<span class="bi bi-chevron-down"></span></a>
                                                 </small>
                                             </p>
@@ -379,7 +382,7 @@
                                                     ` + data[i][5] + `
                                                     <br>
                                                     <small>
-                                                        <a>Reply</a> · 
+                                                        <a id="reply-${data[i][4]}" href="javascript:;" onclick="reply_comment(${data[i][4]});return false;">Reply</a> · 
                                                         <a aria-label="replies">See replies&nbsp;<span class="bi bi-chevron-down"></span></a>
                                                     </small>
                                                 </p>
@@ -442,30 +445,44 @@
 
         // comment-$num
         function reply_comment(comment_id) {
-                var input = `
-                <article class="media">
-                    <figure class="media-left">
-                        <p class="image is-64x64">
-                            <img src="{{session.ppic}}" class="is-sway" alt="{{session.uname}}">
+            var reply_btn = '#reply-' + String(comment_id);
+            $(reply_btn).attr('onclick', 'none');
+            var input = `
+            <article class="media" id="open-reply-segment-${comment_id}">
+                <figure class="media-left">
+                    <p class="image is-64x64">
+                        <img src="{{session.ppic}}" class="is-sway" alt="{{session.uname}}">
+                    </p>
+                </figure>
+                <div class="media-content">
+                    <div class="field">
+                        <p class="control">
+                            <textarea class="textarea btn-round2" name="content" placeholder="Add a comment.." rows="2" minlength="1" maxlength="600" required></textarea>
                         </p>
-                    </figure>
-                    <div class="media-content">
-                        <div class="field">
-                            <p class="control">
-                                <textarea class="textarea btn-round2" name="content" placeholder="Add a comment.." rows="2" minlength="1" maxlength="600" required></textarea>
-                            </p>
-                        </div>
-                        <div class="field">
-                            <p class="control">
-                                <span class="button btn-round is-info" id="reply-` + comment_id + `">
-                                    Reply
-                                </span>
-                            </p>
-                        </div>
                     </div>
-                `;
-                let name = '#comment-parent-' + String(comment_id);
-                $(name).append(input);
-            }
+                    <div class="field is-grouped is-pulled-right">
+                        <p class="control">
+                            <span class="button btn-round is-info" id="reply-button-${comment_id}">
+                                Reply
+                            </span>
+                        </p>
+                        <p class="control">
+                            <span class="button btn-round is-danger" onclick="cancel_open_reply_segment(${comment_id})">
+                                Cancel
+                            </span>
+                        </p>
+                    </div>
+                </div>
+            `;
+            let name = '#comment-parent-' + String(comment_id);
+            $(name).append(input);
+        }
+
+        function cancel_open_reply_segment(id) {
+            var reply_btn = '#reply-' + String(id);
+            $(reply_btn).attr('onclick', 'reply_comment(' + String(id) + ');return false;');
+            var reply_segment = '#open-reply-segment-' + String(id);
+            $(reply_segment).remove();
+        }
     </script>
 {% endblock %}

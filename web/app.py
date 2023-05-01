@@ -11,6 +11,7 @@ import random
 import hashlib
 import datetime
 import time
+import html
 import os
 
 UPLOAD_FOLDER = os.getcwd() + '/pfps'
@@ -97,6 +98,7 @@ def create_post():
       return redirect('/login')
    title = profanity.censor(request.form['title'])
    content = profanity.censor(request.form['content'])
+
    cursor = mysql.connection.cursor()
    cursor.execute('''INSERT INTO posts (posts.user_id, posts.type, posts.title, posts.descr, posts.timestamp) SELECT %s, %s, %s, %s, %s WHERE NOT EXISTS (SELECT * FROM posts where posts.title=%s AND posts.user_id=%s AND posts.type=%s);''', 
    (session['id'], 1, title, content, int(time.time()), title, session['id'], 1))
