@@ -77,9 +77,9 @@
                                 {% for code in (data[0][6]|escape).split('[code]') %}
                                     {% if loop.index > 1 %}
                                         <pre class="prettyprint prefield">{{code.split('[/code]')[0]}}</pre>
-                                        {{code.split('[/code]')[1]|h1|text_filters|nl2br}}
+                                        {{code.split('[/code]')[1]|text_filters|nl2br}}
                                     {% else %}
-                                        {{code|h1|text_filters|nl2br}}
+                                        {{code|text_filters|nl2br}}
                                     {% endif %}
                                 {% endfor %}
                             </p>
@@ -112,12 +112,22 @@
                                                 <span class="modtext">[mod]</span>
                                             {% endif %}</a>
                                             <span> · {{get_post_time(comment[6])}}</span>
+                                            {% if comment[0] == session.uname %}
+                                            <span class="is-pulled-right level-right">
+                                                <a id="" class="level-item" aria-label="delete" data-target="">
+                                                    <span class="bi bi-trash" style="color:red;"></span>
+                                                </a>
+                                                <a id="" class="level-item" aria-label="delete" data-target="">
+                                                    <span class="bi bi-flag-fill" style="color:rgba(255, 107, 107, 0.889);"></span>
+                                                </a>
+                                            </span>
+                                            {% endif %}
                                             <br>
                                             {{comment[5]}}
                                             <br>
                                             <small>
                                                 {% if session.token %}
-                                                    <a id="reply-{{count.value}}" href="javascript:;" onclick="reply_comment({{count.value}});return false;">Reply</a> · 
+                                                    <a id="reply-{{count.value}}" href="javascript:;" onclick="open_reply_segment({{count.value}});return false;">Reply</a> · 
                                                 {% endif %}
                                                 <a aria-label="replies">See replies&nbsp;<span class="bi bi-chevron-down"></span></a>
                                             </small>
@@ -125,63 +135,9 @@
                                     </div>
                                 </div>
                             </article>
+                            <!-- load more replies should be here -->
                         {% endfor %}
-
-                        <!--<article class="media">
-                            <figure class="media-left">
-                              <p class="image is-64x64">
-                                <img src="{{data[0][3]}}" class="is-sway" alt="{{data[0][3]}}">
-                              </p>
-                            </figure>
-                            <div class="media-content">
-                              <div class="content">
-                                <p>
-                                    <strong>Barbara Middleton</strong>
-                                    <br>
-                                    Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis porta eros lacus, nec ultricies elit blandit non. Suspendisse pellentesque mauris sit amet dolor blandit rutrum. Nunc in tempus turpis.
-                                    <br>
-                                    <small>
-                                        <a href="#" aria-label="like"><span class="bi bi-hand-thumbs-up"></span>&nbsp;2192</a> · 
-                                        <a>Reply</a>
-                                        <span> · 2yr</span>
-                                    </small>
-                                </p>
-                              </div>
-                          
-                              <article class="media">
-                                <figure class="media-left">
-                                  <p class="image is-48x48">
-                                    <img src="{{data[0][3]}}" class="is-sway" alt="{{data[0][0]}}">
-                                  </p>
-                                </figure>
-                                <div class="media-content">
-                                  <div class="content">
-                                    <p>
-                                        <strong>Sean Brown</strong>
-                                        <small> · 16 d</small>
-                                        <br>Donec sollicitudin urna eget eros malesuada sagittis. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Aliquam blandit nisl a nulla sagittis, a lobortis leo feugiat.<br>
-                                    </p>
-                                  </div>
-                              </article>
-                          
-                                <article class="media">
-                                    <figure class="media-left">
-                                        <p class="image is-48x48">
-                                            <img src="{{data[0][3]}}" class="is-sway" alt="{{data[0][0]}}">
-                                        </p>
-                                    </figure>
-                                    <div class="media-content">
-                                        <div class="content">
-                                            <p>
-                                                <strong>Kayli Eunice </strong>
-                                                <small> · 3 hrs</small>
-                                                <br>Sed convallis scelerisque mauris, non pulvinar nunc mattis vel. Maecenas varius felis sit amet magna vestibulum euismod malesuada cursus libero. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae; Phasellus lacinia non nisl id feugiat.<br>
-                                            </p>
-                                        </div>
-                                    </div>
-                                </article>
-                            </div>
-                        </article>-->
+                        
                     </div>
                     {% if data[3][0]|int > 6 %}
                         <div style="padding-top: 15px;"></div>
@@ -310,14 +266,14 @@
                                 $('#comms-0').click();
                                 var id = Math.floor(Math.random() * 1000000);
                                 var comment = `
-                                <article class="media" id="${id}">
+                                <article id="${id}" class="media">
                                     <figure class="media-left">
                                         <p class="image is-64x64">
                                             <img src="{{session.ppic}}" class="is-sway" alt="{{session.uname}}">
                                         </p>
                                     </figure>
                                     <div class="media-content">
-                                        <div class="content">
+                                        <div id="comment-parent-${id}" class="content">
                                             <p>
                                                 <a href="/profile/{{session.uname}}}">{{session.uname}}
                                                 {% if session.verified %}
@@ -331,7 +287,7 @@
                                                 ` + content + `
                                                 <br>
                                                 <small>
-                                                    <a id="reply-${id}" href="javascript:;" onclick="reply_comment(${id});return false;">Reply</a> · 
+                                                    <a id="reply-${id}" href="javascript:;" onclick="open_reply_segment(${id});return false;">Reply</a> · 
                                                     <a aria-label="replies">See replies&nbsp;<span class="bi bi-chevron-down"></span></a>
                                                 </small>
                                             </p>
@@ -372,7 +328,7 @@
                                             </p>
                                         </figure>
                                         <div class="media-content">
-                                            <div class="content">
+                                            <div id="comment-parent-${data[i][4]}" class="content">
                                                 <p>
                                                     <a href="/profile/` + data[i][0] + `">` + data[i][0] + `
                                                     ` + (data[i][1] == "True" ? `<span class="bi bi-patch-check is-verified"></span>` : "") + `
@@ -382,7 +338,7 @@
                                                     ` + data[i][5] + `
                                                     <br>
                                                     <small>
-                                                        <a id="reply-${data[i][4]}" href="javascript:;" onclick="reply_comment(${data[i][4]});return false;">Reply</a> · 
+                                                        <a id="reply-${data[i][4]}" href="javascript:;" onclick="open_reply_segment(${data[i][4]});return false;">Reply</a> · 
                                                         <a aria-label="replies">See replies&nbsp;<span class="bi bi-chevron-down"></span></a>
                                                     </small>
                                                 </p>
@@ -444,45 +400,149 @@
         });
 
         // comment-$num
-        function reply_comment(comment_id) {
+        function open_reply_segment(comment_id) {
             var reply_btn = '#reply-' + String(comment_id);
             $(reply_btn).attr('onclick', 'none');
             var input = `
             <article class="media" id="open-reply-segment-${comment_id}">
                 <figure class="media-left">
-                    <p class="image is-64x64">
+                    <p class="image is-48x48">
                         <img src="{{session.ppic}}" class="is-sway" alt="{{session.uname}}">
                     </p>
                 </figure>
                 <div class="media-content">
                     <div class="field">
                         <p class="control">
-                            <textarea class="textarea btn-round2" name="content" placeholder="Add a comment.." rows="2" minlength="1" maxlength="600" required></textarea>
+                            <textarea class="textarea btn-round2" name="reply-to-comment-${comment_id}" placeholder="Add a comment.." rows="2" minlength="1" maxlength="600" required></textarea>
                         </p>
                     </div>
                     <div class="field is-grouped is-pulled-right">
                         <p class="control">
-                            <span class="button btn-round is-info" id="reply-button-${comment_id}">
+                            <span class="button btn-round2 is-info" id="reply-button-${comment_id}" onclick="reply_to_comment(${comment_id})">
                                 Reply
                             </span>
                         </p>
                         <p class="control">
-                            <span class="button btn-round is-danger" onclick="cancel_open_reply_segment(${comment_id})">
+                            <span class="button btn-round2 is-danger" onclick="cancel_open_reply_segment(${comment_id})">
                                 Cancel
                             </span>
                         </p>
-                    </div>
+                    </div>  
                 </div>
+            </article>
             `;
             let name = '#comment-parent-' + String(comment_id);
             $(name).append(input);
         }
 
+        function reply_to_comment(id) {
+            var content = $('textarea[name="reply-to-comment-' + id + '"]').val();
+            if (content.length > 0) {
+                $.ajax({
+                    url: '/api/v1/{{data[0][4]}}/4/c',
+                    type: 'POST',
+                    data: {
+                        'content': content
+                    },
+                    success: function(data) {
+                        if (data == "OK") {
+                            $('textarea[name="content"]').val("");
+                            $('#comms-0').click();
+                            var id = Math.floor(Math.random() * 1000000);
+                            var comment = `
+                            <article id="${id}" class="media">
+                                <figure class="media-left">
+                                    <p class="image is-48x48">
+                                        <img src="{{session.ppic}}" class="is-sway" alt="{{session.uname}}">
+                                    </p>
+                                </figure>
+                                <div class="media-content">
+                                    <div id="comment-parent-${id}" class="content">
+                                        <p>
+                                            <a href="/profile/{{session.uname}}}">{{session.uname}}
+                                            {% if session.verified %}
+                                                <span class="bi bi-patch-check is-verified"></span>
+                                            {% endif %}
+                                            {% if session.mod %}
+                                                <span class="modtext">[mod]</span>
+                                            {% endif %}</a>
+                                            <span> · Just Now</span>
+                                            <br>
+                                            ` + content + `
+                                            <br>
+                                            <small>
+                                                <a id="reply-${id}" href="javascript:;" onclick="open_reply_segment(${id});return false;">Reply</a> · 
+                                                <a aria-label="replies">See replies&nbsp;<span class="bi bi-chevron-down"></span></a>
+                                            </small>
+                                        </p>
+                                    </div>
+                                </div>
+                            </article>
+                            `;
+                            
+                            $('#comment-box').prepend(comment);
+                            var num_of_comms = parseInt($('#comms-num').text());
+                            $('#comms-num').html("<span class=\"bi bi-chat\"></span>&nbsp;" + (num_of_comms + 1) + " Comment(s)");
+                            $('#comms-0').html("&nbsp;" + (num_of_comms + 1));
+                        } else {
+                            alert("Couldn't post comment. Please try again later.");
+                        }
+                    }
+                });
+            }
+        }
+
         function cancel_open_reply_segment(id) {
             var reply_btn = '#reply-' + String(id);
-            $(reply_btn).attr('onclick', 'reply_comment(' + String(id) + ');return false;');
+            $(reply_btn).attr('onclick', 'open_reply_segment(' + String(id) + ');return false;');
             var reply_segment = '#open-reply-segment-' + String(id);
             $(reply_segment).remove();
+        }
+
+        function see_replies(id, reply_count) {
+            $.ajax({
+                url: '/api/v1/{{data[0][4]}}/4/r-c',
+                type: 'POST',
+                data: {
+                    'last_id': reply_count
+                },
+                success: function(data) {
+                    if (data != "Error") {
+                        if (data.length > 0) {
+                            for (var i = 0; i < data.length; i++) {
+                                var reply = `
+                                <article id="` + data[i][4] + `" class="media">
+                                    <figure class="media-left">
+                                        <p class="image is-48x48">
+                                            <img src="` + data[i][3] + `" class="is-sway" alt="` + data[i][0] + `">
+                                        </p>
+                                    </figure>
+                                    <div class="media-content">
+                                        <div class="content">
+                                            <p>
+                                                <a href="/profile/` + data[i][0] + `">` + data[i][0] + `
+                                                ` + (data[i][1] == 1 ? `<span class="bi bi-patch-check is-verified"></span>` : "") + `
+                                                ` + (data[i][2] == 1 ? `<span class="modtext">[mod]</span>` : "") + `</a>
+                                                <span> · ` + data[i][6] + `</span>
+                                                <br>
+                                                ` + data[i][5] + `
+                                                <br>
+                                                <small>
+                                                    <a id="flag-${data[i][3]}" href="javascript:;" onclick="flag_content(${data[i][3]});return false;">Report</a>
+                                                </small>
+                                            </p>
+                                        </div>
+                                </article>
+                                `;
+                                $('#comment-parent-' + id).append(reply);
+                            }
+                        } else {
+                            console.log("no more replies");
+                        }
+                    }
+                    reply_count += data.length;
+                }
+            });
         }
     </script>
 {% endblock %}

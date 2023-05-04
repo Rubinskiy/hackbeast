@@ -5,7 +5,7 @@ from flask_session import Session
 from better_profanity import profanity
 from uuid import uuid4
 import helpers.dbfunc as dbf
-from helpers.filters import nl2br, text_filters, h1
+from helpers.filters import nl2br, text_filters
 from PIL import Image
 import random
 import hashlib
@@ -37,11 +37,11 @@ mysql = MySQL(app)
 
 app.jinja_env.filters['nl2br'] = nl2br
 app.jinja_env.filters['text_filters'] = text_filters
-app.jinja_env.filters['h1'] = h1
 
 # https://github.com/snguyenthanh/better_profanity/blob/master/better_profanity/profanity_wordlist.txt
 custom_curse_words = [
-   'shit'
+   'shit',
+   'fuck'
 ]
 profanity.load_censor_words(custom_curse_words)
 
@@ -263,6 +263,7 @@ def api_forum(post_id=None, post_type=None, action=None):
    if action == "l":
       cursor.execute('''INSERT INTO posts (posts.post_id, posts.user_id, posts.type, timestamp) SELECT %s, %s, %s, %s WHERE NOT EXISTS (SELECT * FROM posts where posts.post_id=%s AND posts.user_id=%s AND posts.type=%s);''', 
       (post_id, session['id'], post_type, int(time.time()), post_id, session['id'], post_type))
+   # Unlike functionality
    elif action == "u":
       cursor.execute('''DELETE FROM posts WHERE posts.post_id=%s AND posts.user_id=%s AND posts.type=%s;''', 
       (post_id, session['id'], post_type))
@@ -271,6 +272,7 @@ def api_forum(post_id=None, post_type=None, action=None):
       post_content = profanity.censor(request.form['content'])
       cursor.execute('''INSERT INTO posts (posts.post_id, posts.user_id, posts.type, posts.descr, timestamp) VALUES(%s, %s, %s, %s, %s);''',
       (post_id, session['id'], post_type, post_content, int(time.time())))
+   # Get comments
    elif action == "c-c":
       cursor.execute('''SELECT profiles.username, profiles.is_verified, profiles.is_mod, profiles.ppic, posts.id, posts.descr, posts.timestamp FROM profiles, posts WHERE profiles.id=posts.user_id AND posts.type=3 AND posts.post_id=%s ORDER BY posts.timestamp DESC LIMIT 6 OFFSET %s;''',
       ([post_id, int(request.form['last_id'])]))
@@ -320,6 +322,20 @@ def api_forum(post_id=None, post_type=None, action=None):
             session['uname'] = username
       else:
          return "Invalid username"
+   # Reply to comments
+   elif action == "r":
+      post_content = profanity.censor(request.form['content'])
+      cursor.execute('''INSERT INTO posts (posts.post_id, posts.user_id, posts.type, posts.descr, timestamp) VALUES(%s, %s, %s, %s, %s);''',
+      (post_id, session['id'], post_type, post_content, int(time.time())))
+   # Get replies
+   elif action == "r-c":
+      cursor.execute('''SELECT profiles.username, profiles.is_verified, profiles.is_mod, profiles.ppic, posts.id, posts.descr, posts.timestamp FROM profiles, posts WHERE profiles.id=posts.user_id AND posts.type=4 AND posts.post_id=%s ORDER BY posts.timestamp DESC LIMIT 6 OFFSET %s;''',
+      ([post_id, int(request.form['last_id'])]))
+      response = cursor.fetchall()
+      response = [list(i) for i in response]
+      for i in response:
+         i[6] = get_post_time(i[6])
+      response = [tuple(i) for i in response]
    cursor.close()
 
    try:
@@ -329,6 +345,8 @@ def api_forum(post_id=None, post_type=None, action=None):
    finally:
       cursor.close()
       if (action == "c-c"):
+         return jsonify(response)
+      elif (action == "r-c"):
          return jsonify(response)
       else:
          return "OK", 200
